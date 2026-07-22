@@ -41,7 +41,7 @@ async function sorgula() {
             abuse: abuse.status === "fulfilled" ? abuse.value : null
         });
 
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 200));
     }
 
     sonVeriler = sonuclar;
