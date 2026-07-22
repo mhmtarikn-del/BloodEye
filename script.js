@@ -79,6 +79,22 @@ function tabloOlustur(veriler) {
 
     html += "</table>";
     document.getElementById("sonuc").innerHTML = html;
+     let blackIPs = [];
+    let whiteIPs = [];
+    
+    veriler.forEach(v => {
+        const infoPuan = infoSusPuan(v);
+        const abusePuan = abuseSusPuan(v);
+        if (abusePuan >= 20 || infoPuan >= 20) {
+            blackIPs.push(v.ip);
+        } else {
+            whiteIPs.push(v.ip);
+        }
+    });
+    
+    document.getElementById("blacklist").value = blackIPs.join("\n");
+    document.getElementById("whitelist").value = whiteIPs.join("\n");
+    document.getElementById("listeler").style.display = "flex";
 }
 
 function infoSusPuan(v) {
