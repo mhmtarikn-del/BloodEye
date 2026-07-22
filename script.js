@@ -1,7 +1,4 @@
-// v10 final - bloodeye
-const IPINFO_TOKEN = "ac4265c4327807";
-const ABUSE_TOKEN = "389e145892cade03816f5bdeed74e6afc553c01e4f430d6a90f9f64fded05d36d2408a38dbc95c3a";
-
+// v11
 document.getElementById("sorguBtn").addEventListener("click", sorgula);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
 
@@ -36,11 +33,11 @@ async function sorgula() {
         let abuseData = null;
 
         try {
-            ipInfoData = await fetch(`https://ipinfo.io/${ip}?token=${IPINFO_TOKEN}`).then(r => r.json());
+            ipInfoData = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`).then(r => r.json());
         } catch(e) {}
 
         try {
-            abuseData = await fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}&key=${ABUSE_TOKEN}`).then(r => r.json());
+            abuseData = await fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}`).then(r => r.json());
         } catch(e) {}
 
         sonuclar.push({ ip, ipInfo: ipInfoData, abuse: abuseData });
