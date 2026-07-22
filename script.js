@@ -1,3 +1,4 @@
+// v8 - render proxy
 const IPINFO_TOKEN = "ac4265c4327807";
 const ABUSE_TOKEN = "389e145892cade03816f5bdeed74e6afc553c01e4f430d6a90f9f64fded05d36d2408a38dbc95c3a";
 
