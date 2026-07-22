@@ -32,7 +32,7 @@ async function sorgula() {
 
         const [ipInfo, abuse] = await Promise.allSettled([
             fetch(`https://ipinfo.io/${ip}?token=${IPINFO_TOKEN}`).then(r => r.json()),
-            fetch("https://corsproxy.io/?" + encodeURIComponent(`https://api.abuseipdb.com/api/v2/check?ipAddress=${ip}&maxAgeInDays=90`), {
+            fetch("https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(`https://api.abuseipdb.com/api/v2/check?ipAddress=${ip}&maxAgeInDays=90`), {
                 headers: { "Key": ABUSE_TOKEN, "Accept": "application/json" }
             }).then(r => r.json())
         ]);
