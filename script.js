@@ -1,4 +1,4 @@
-// v8 - render proxy
+// proxy
 const IPINFO_TOKEN = "ac4265c4327807";
 const ABUSE_TOKEN = "389e145892cade03816f5bdeed74e6afc553c01e4f430d6a90f9f64fded05d36d2408a38dbc95c3a";
 
@@ -23,7 +23,8 @@ async function sorgula() {
     btn.disabled = true;
     btn.textContent = "Sorgulanıyor...";
     exportBtn.style.display = "none";
-    sonucDiv.innerHTML = '<p class="loading">ipinfo + AbuseIPDB sorgulanıyor... (Her IP ~1 saniye)</p>';
+    document.getElementById("listeler").style.display = "none";
+    sonucDiv.innerHTML = '<p class="loading">ipinfo + AbuseIPDB sorgulanıyor...</p>';
 
     const sonuclar = [];
 
@@ -31,17 +32,18 @@ async function sorgula() {
         const ip = ipListesi[i];
         sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${ipListesi.length} - ${ip}</p>`;
 
-        const [ipInfo, abuse] = await Promise.allSettled([
-            fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}&key=${ABUSE_TOKEN}`).then(r => r.json())
-        ]);
+        let ipInfoData = null;
+        let abuseData = null;
 
-        sonuclar.push({
-            ip: ip,
-            ipInfo: ipInfo.status === "fulfilled" ? ipInfo.value : null,
-            abuse: abuse.status === "fulfilled" ? abuse.value : null
-        });
+        try {
+            ipInfoData = await fetch(`https://ipinfo.io/${ip}?token=${IPINFO_TOKEN}`).then(r => r.json());
+        } catch(e) {}
 
-        await new Promise(r => setTimeout(r, 200));
+        try {
+            abuseData = await fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}&key=${ABUSE_TOKEN}`).then(r => r.json());
+        } catch(e) {}
+
+        sonuclar.push({ ip, ipInfo: ipInfoData, abuse: abuseData });
     }
 
     sonVeriler = sonuclar;
@@ -77,9 +79,10 @@ function tabloOlustur(veriler) {
 
     html += "</table>";
     document.getElementById("sonuc").innerHTML = html;
-     let blackIPs = [];
+
+    let blackIPs = [];
     let whiteIPs = [];
-    
+
     veriler.forEach(v => {
         const infoPuan = infoSusPuan(v);
         const abusePuan = abuseSusPuan(v);
@@ -89,7 +92,7 @@ function tabloOlustur(veriler) {
             whiteIPs.push(v.ip);
         }
     });
-    
+
     document.getElementById("blacklist").value = blackIPs.join("\n");
     document.getElementById("whitelist").value = whiteIPs.join("\n");
     document.getElementById("listeler").style.display = "flex";
@@ -153,7 +156,6 @@ function exportCSV() {
         const ipInfo = v.ipInfo;
         const infoPuan = infoSusPuan(v);
         const abusePuan = abuseSusPuan(v);
-
         csv += `${v.ip},${(ipInfo && ipInfo.country) || "-"},${(ipInfo && ipInfo.org) || "-"},%${infoPuan},%${abusePuan}\n`;
     });
 
