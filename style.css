@@ -243,12 +243,17 @@ tr:hover {
     border-radius: 8px 8px 0 0;
     font-weight: bold;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .liste-aciklama {
     font-weight: normal;
     font-size: 11px;
     color: #aaa;
+    flex: 1;
 }
 
 .blacklist .liste-baslik {
@@ -280,4 +285,30 @@ tr:hover {
 .whitelist textarea {
     border-color: #44ff44;
     color: #66ff66;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 15px;
+    color: #666;
+    font-size: 13px;
+}
+
+.footer-name {
+    color: #e94560;
+    font-weight: bold;
+}
+
+.copyBtn {
+    width: auto;
+    padding: 4px 12px;
+    font-size: 12px;
+    background: #333;
+    border-radius: 4px;
+    margin: 0;
+}
+
+.copyBtn:hover {
+    background: #e94560;
 }

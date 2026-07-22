@@ -1,4 +1,4 @@
-// proxy
+// v10 final - bloodeye
 const IPINFO_TOKEN = "ac4265c4327807";
 const ABUSE_TOKEN = "389e145892cade03816f5bdeed74e6afc553c01e4f430d6a90f9f64fded05d36d2408a38dbc95c3a";
 
@@ -164,4 +164,16 @@ function exportCSV() {
     link.href = URL.createObjectURL(blob);
     link.download = "ip_sorgu_sonuc.csv";
     link.click();
+}
+
+function kopyala(id) {
+    const textarea = document.getElementById(id);
+    textarea.select();
+    textarea.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(textarea.value);
+
+    const btn = textarea.parentElement.querySelector(".copyBtn");
+    const original = btn.textContent;
+    btn.textContent = "✅ Kopyalandı!";
+    setTimeout(() => { btn.textContent = original; }, 1500);
 }

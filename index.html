@@ -10,22 +10,34 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <svg width="50" height="50" viewBox="0 0 100 100">
+                <svg width="55" height="55" viewBox="0 0 100 100">
                     <defs>
                         <filter id="glow">
-                            <feGaussianBlur stdDeviation="3" result="blur"/>
+                            <feGaussianBlur stdDeviation="2.5" result="blur"/>
                             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
+                        <radialGradient id="bloodGrad" cx="50%" cy="50%">
+                            <stop offset="0%" stop-color="#ff1a1a"/>
+                            <stop offset="100%" stop-color="#8b0000"/>
+                        </radialGradient>
                     </defs>
-                    <ellipse cx="50" cy="50" rx="30" ry="35" fill="none" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
-                    <circle cx="50" cy="45" r="12" fill="#e94560" filter="url(#glow)"/>
-                    <circle cx="50" cy="45" r="5" fill="#1a1a2e"/>
-                    <path d="M15 30 Q50 10 85 30" fill="none" stroke="#e94560" stroke-width="2" filter="url(#glow)"/>
-                    <path d="M15 70 Q50 90 85 70" fill="none" stroke="#e94560" stroke-width="2" filter="url(#glow)"/>
-                    <line x1="30" y1="15" x2="25" y2="5" stroke="#e94560" stroke-width="2" filter="url(#glow)"/>
-                    <line x1="70" y1="15" x2="75" y2="5" stroke="#e94560" stroke-width="2" filter="url(#glow)"/>
-                    <line x1="30" y1="85" x2="25" y2="95" stroke="#e94560" stroke-width="2" filter="url(#glow)"/>
-                    <line x1="70" y1="85" x2="75" y2="95" stroke="#e94560" stroke-width="2" filter="url(#glow)"/>
+                    <line x1="20" y1="20" x2="40" y2="28" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
+                    <line x1="80" y1="20" x2="60" y2="28" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
+                    <ellipse cx="50" cy="50" rx="32" ry="30" fill="none" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
+                    <path d="M50 80 Q45 92 40 100" fill="none" stroke="#ff1a1a" stroke-width="2.5" filter="url(#glow)"/>
+                    <path d="M50 80 Q55 92 60 100" fill="none" stroke="#ff1a1a" stroke-width="2.5" filter="url(#glow)"/>
+                    <path d="M50 80 Q50 90 50 100" fill="none" stroke="#ff1a1a" stroke-width="2" filter="url(#glow)"/>
+                    <circle cx="50" cy="48" r="14" fill="url(#bloodGrad)" filter="url(#glow)"/>
+                    <circle cx="50" cy="48" r="6" fill="#1a1a2e"/>
+                    <circle cx="47" cy="46" r="2" fill="#ff4444"/>
+                    <path d="M30 40 Q35 35 40 40" fill="none" stroke="#cc0000" stroke-width="1"/>
+                    <path d="M70 40 Q65 35 60 40" fill="none" stroke="#cc0000" stroke-width="1"/>
+                    <path d="M25 55 Q35 58 40 53" fill="none" stroke="#cc0000" stroke-width="1"/>
+                    <path d="M75 55 Q65 58 60 53" fill="none" stroke="#cc0000" stroke-width="1"/>
+                    <line x1="50" y1="28" x2="50" y2="20" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
+                    <line x1="50" y1="68" x2="50" y2="76" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
+                    <line x1="28" y1="48" x2="20" y2="48" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
+                    <line x1="72" y1="48" x2="80" y2="48" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
                 </svg>
                 <span class="logo-text">Blood<span class="logo-accent">Eye</span></span>
             </div>
@@ -36,14 +48,21 @@
         <div id="sonuc"></div>
         <div id="listeler" style="display:none;">
             <div class="liste-kutu blacklist">
-                <div class="liste-baslik">⛔ Black List <span class="liste-aciklama">(AbuseIPDB ≥20 veya ipinfo ≥20)</span></div>
+                <div class="liste-baslik">
+                    ⛔ Black List <span class="liste-aciklama">(AbuseIPDB ≥20 veya ipinfo ≥20)</span>
+                    <button class="copyBtn" onclick="kopyala('blacklist')">📋 Kopyala</button>
+                </div>
                 <textarea id="blacklist" readonly placeholder="Black list IP'leri burada görünür..."></textarea>
             </div>
             <div class="liste-kutu whitelist">
-                <div class="liste-baslik">✅ White List <span class="liste-aciklama">(Tüm puanlar &lt;20)</span></div>
+                <div class="liste-baslik">
+                    ✅ White List <span class="liste-aciklama">(Tüm puanlar &lt;20)</span>
+                    <button class="copyBtn" onclick="kopyala('whitelist')">📋 Kopyala</button>
+                </div>
                 <textarea id="whitelist" readonly placeholder="White list IP'leri burada görünür..."></textarea>
             </div>
         </div>
+        <footer class="footer">Created by <span class="footer-name">Tarkovic</span></footer>
     </div>
     <script src="script.js"></script>
 </body>
