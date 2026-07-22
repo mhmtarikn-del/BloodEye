@@ -31,7 +31,7 @@ async function sorgula() {
         sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${ipListesi.length} - ${ip}</p>`;
 
         const [ipApi, ipInfo, ipqs] = await Promise.allSettled([
-            fetch(`http://ip-api.com/json/${ip}?fields=66846719`).then(r => r.json()),
+            fetch(`https://ip-api.com/json/${ip}?fields=66846719`).then(r => r.json()),
             fetch(`https://ipinfo.io/${ip}?token=${IPINFO_TOKEN}`).then(r => r.json()),
             fetch(`https://ipqualityscore.com/api/json/ip/${IPQS_TOKEN}/${ip}`).then(r => r.json())
         ]);
