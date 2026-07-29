@@ -1,4 +1,4 @@
-// v11
+// v13 - regex + benzersiz IP + xls export
 document.getElementById("sorguBtn").addEventListener("click", sorgula);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
 
@@ -15,8 +15,14 @@ async function sorgula() {
         return;
     }
 
-   const ipRegex = /(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g;
-const ipListesi = input.match(ipRegex) || [];
+    const ipRegex = /(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g;
+    const ipListesi = input.match(ipRegex) || [];
+    const benzersizIP = [...new Set(ipListesi)];
+
+    if (benzersizIP.length === 0) {
+        sonucDiv.innerHTML = '<p class="hata">Geçerli IP adresi bulunamadı.</p>';
+        return;
+    }
 
     btn.disabled = true;
     btn.textContent = "Sorgulanıyor...";
@@ -26,20 +32,15 @@ const ipListesi = input.match(ipRegex) || [];
 
     const sonuclar = [];
 
-    for (let i = 0; i < ipListesi.length; i++) {
-        const ip = ipListesi[i];
-        sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${ipListesi.length} - ${ip}</p>`;
+    for (let i = 0; i < benzersizIP.length; i++) {
+        const ip = benzersizIP[i];
+        sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${benzersizIP.length} - ${ip}</p>`;
 
         let ipInfoData = null;
         let abuseData = null;
 
-        try {
-            ipInfoData = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`).then(r => r.json());
-        } catch(e) {}
-
-        try {
-            abuseData = await fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}`).then(r => r.json());
-        } catch(e) {}
+        try { ipInfoData = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`).then(r => r.json()); } catch(e) {}
+        try { abuseData = await fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}`).then(r => r.json()); } catch(e) {}
 
         sonuclar.push({ ip, ipInfo: ipInfoData, abuse: abuseData });
     }
@@ -53,12 +54,9 @@ const ipListesi = input.match(ipRegex) || [];
 
 function tabloOlustur(veriler) {
     let html = "<table>";
-    html += "<tr><th>IP</th><th>Ülke</th><th>ISP/Org</th><th>ipinfo Puan</th><th>AbuseIPDB</th><th></th></tr>";
+    html += "<tr><th>IP</th><th>Ülke</th><th>ISP/Org</th><th>ipinfo</th><th>AbuseIPDB</th><th></th></tr>";
 
     veriler.forEach((v, index) => {
-        const ipInfo = v.ipInfo;
-        const abuse = v.abuse;
-
         const infoPuan = infoSusPuan(v);
         const abusePuan = abuseSusPuan(v);
 
@@ -67,8 +65,8 @@ function tabloOlustur(veriler) {
 
         html += "<tr>";
         html += `<td>${v.ip}</td>`;
-        html += `<td>${(ipInfo && ipInfo.country) || "-"}</td>`;
-        html += `<td>${(ipInfo && ipInfo.org) || "-"}</td>`;
+        html += `<td>${(v.ipInfo && v.ipInfo.country) || "-"}</td>`;
+        html += `<td>${(v.ipInfo && v.ipInfo.org) || "-"}</td>`;
         html += `<td class="${infoSinif}">%${infoPuan}</td>`;
         html += `<td class="${abuseSinif}">%${abusePuan}</td>`;
         html += `<td><button class="detayBtn" onclick="detayGoster(${index})">Detay</button></td>`;
@@ -120,46 +118,47 @@ function abuseSusPuan(v) {
 
 function detayGoster(index) {
     const v = sonVeriler[index];
-    const ipInfo = v.ipInfo;
-    const abuse = v.abuse;
 
-    let html = `<div class="popup-overlay" onclick="this.remove()">`;
-    html += `<div class="popup" onclick="event.stopPropagation()">`;
-    html += `<h2>${v.ip} - Ham Veri</h2>`;
-    html += `<button class="popup-close" onclick="document.querySelector('.popup-overlay').remove()">✕</button>`;
+    let detayHtml = `<div class="popup-overlay" onclick="this.remove()">`;
+    detayHtml += `<div class="popup" onclick="event.stopPropagation()">`;
+    detayHtml += `<h2>${v.ip} - Ham Veri</h2>`;
+    detayHtml += `<button class="popup-close" onclick="document.querySelector('.popup-overlay').remove()">✕</button>`;
 
-    html += `<h3>ipinfo.io</h3>`;
-    html += `<pre>${ipInfo ? JSON.stringify(ipInfo, null, 2) : "Veri alınamadı"}</pre>`;
+    detayHtml += `<h3>ipinfo.io</h3>`;
+    detayHtml += `<pre>${v.ipInfo ? JSON.stringify(v.ipInfo, null, 2) : "Veri alınamadı"}</pre>`;
 
-    html += `<h3>AbuseIPDB</h3>`;
-    html += `<pre>${abuse ? JSON.stringify(abuse, null, 2) : "Veri alınamadı"}</pre>`;
+    detayHtml += `<h3>AbuseIPDB</h3>`;
+    detayHtml += `<pre>${v.abuse ? JSON.stringify(v.abuse, null, 2) : "Veri alınamadı"}</pre>`;
 
-    html += `<h3>Manuel Sorgu Linkleri</h3>`;
-    html += `<div class="link-list">`;
-    html += `<a href="https://ipinfo.io/${v.ip}" target="_blank">ipinfo.io</a>`;
-    html += `<a href="https://www.abuseipdb.com/check/${v.ip}" target="_blank">AbuseIPDB</a>`;
-    html += `<a href="https://www.virustotal.com/gui/ip-address/${v.ip}" target="_blank">VirusTotal</a>`;
-    html += `<a href="https://whatismyipaddress.com/ip/${v.ip}" target="_blank">WhatIsMyIP</a>`;
-    html += `</div>`;
+    detayHtml += `<h3>Manuel Sorgu Linkleri</h3>`;
+    detayHtml += `<div class="link-list">`;
+    detayHtml += `<a href="https://ipinfo.io/${v.ip}" target="_blank">ipinfo.io</a>`;
+    detayHtml += `<a href="https://www.abuseipdb.com/check/${v.ip}" target="_blank">AbuseIPDB</a>`;
+    detayHtml += `<a href="https://www.virustotal.com/gui/ip-address/${v.ip}" target="_blank">VirusTotal</a>`;
+    detayHtml += `<a href="https://whatismyipaddress.com/ip/${v.ip}" target="_blank">WhatIsMyIP</a>`;
+    detayHtml += `</div>`;
 
-    html += `</div></div>`;
+    detayHtml += `</div></div>`;
 
-    document.body.insertAdjacentHTML("beforeend", html);
+    document.body.insertAdjacentHTML("beforeend", detayHtml);
 }
 
 function exportCSV() {
-    let csv = "IP;Ülke;ISP/Org;ipinfo Puan;AbuseIPDB Puan\n";
+    let html = "<table>";
+    html += "<tr><th>IP</th><th>Ülke</th><th>ISP/Org</th><th>ipinfo Puan</th><th>AbuseIPDB Puan</th></tr>";
 
     sonVeriler.forEach(v => {
         const infoPuan = infoSusPuan(v);
         const abusePuan = abuseSusPuan(v);
-        csv += `${v.ip};${(v.ipInfo && v.ipInfo.country) || "-"};${(v.ipInfo && v.ipInfo.org) || "-"};%${infoPuan};%${abusePuan}\n`;
+        html += `<tr><td>${v.ip}</td><td>${(v.ipInfo && v.ipInfo.country) || "-"}</td><td>${(v.ipInfo && v.ipInfo.org) || "-"}</td><td>%${infoPuan}</td><td>%${abusePuan}</td></tr>`;
     });
 
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    html += "</table>";
+
+    const blob = new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "ip_sorgu_sonuc.csv";
+    link.download = "ip_sorgu_sonuc.xls";
     link.click();
 }
 
