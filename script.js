@@ -148,18 +148,21 @@ function detayGoster(index) {
 }
 
 function exportCSV() {
-    let csv = "IP;Ülke;ISP/Org;ipinfo Puan;AbuseIPDB Puan\n";
+    let html = "<table>";
+    html += "<tr><th>IP</th><th>Ülke</th><th>ISP/Org</th><th>ipinfo Puan</th><th>AbuseIPDB Puan</th></tr>";
 
     sonVeriler.forEach(v => {
         const infoPuan = infoSusPuan(v);
         const abusePuan = abuseSusPuan(v);
-        csv += `${v.ip};${(v.ipInfo && v.ipInfo.country) || "-"};${(v.ipInfo && v.ipInfo.org) || "-"};%${infoPuan};%${abusePuan}\n`;
+        html += `<tr><td>${v.ip}</td><td>${(v.ipInfo && v.ipInfo.country) || "-"}</td><td>${(v.ipInfo && v.ipInfo.org) || "-"}</td><td>%${infoPuan}</td><td>%${abusePuan}</td></tr>`;
     });
 
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    html += "</table>";
+
+    const blob = new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "ip_sorgu_sonuc.csv";
+    link.download = "ip_sorgu_sonuc.xls";
     link.click();
 }
 
