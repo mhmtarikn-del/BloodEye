@@ -15,8 +15,14 @@ async function sorgula() {
         return;
     }
 
-    const ipRegex = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
-const ipListesi = input.match(ipRegex) || [];
+    const satirlar = input.split("\n");
+const ipRegex = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+const ipListesi = [];
+
+satirlar.forEach(satir => {
+    const match = satir.match(ipRegex);
+    if (match) ipListesi.push(match[0]);
+});
 
     btn.disabled = true;
     btn.textContent = "Sorgulanıyor...";
