@@ -148,13 +148,12 @@ function detayGoster(index) {
 }
 
 function exportCSV() {
-    let csv = "IP,Ülke,ISP/Org,ipinfo Puan,AbuseIPDB Puan\n";
+    let csv = "IP;Ülke;ISP/Org;ipinfo Puan;AbuseIPDB Puan\n";
 
     sonVeriler.forEach(v => {
-        const ipInfo = v.ipInfo;
         const infoPuan = infoSusPuan(v);
         const abusePuan = abuseSusPuan(v);
-        csv += `${v.ip},${(ipInfo && ipInfo.country) || "-"},${(ipInfo && ipInfo.org) || "-"},%${infoPuan},%${abusePuan}\n`;
+        csv += `${v.ip};${(v.ipInfo && v.ipInfo.country) || "-"};${(v.ipInfo && v.ipInfo.org) || "-"};%${infoPuan};%${abusePuan}\n`;
     });
 
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
