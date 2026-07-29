@@ -10,34 +10,51 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <svg width="55" height="55" viewBox="0 0 100 100">
+                               <svg width="60" height="60" viewBox="0 0 100 100">
                     <defs>
                         <filter id="glow">
-                            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                            <feGaussianBlur stdDeviation="2" result="blur"/>
                             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
-                        <radialGradient id="bloodGrad" cx="50%" cy="50%">
+                        <radialGradient id="irisGrad" cx="50%" cy="50%">
                             <stop offset="0%" stop-color="#ff1a1a"/>
-                            <stop offset="100%" stop-color="#8b0000"/>
+                            <stop offset="60%" stop-color="#990000"/>
+                            <stop offset="100%" stop-color="#4d0000"/>
                         </radialGradient>
                     </defs>
-                    <line x1="20" y1="20" x2="40" y2="28" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
-                    <line x1="80" y1="20" x2="60" y2="28" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
-                    <ellipse cx="50" cy="50" rx="32" ry="30" fill="none" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
-                    <path d="M50 80 Q45 92 40 100" fill="none" stroke="#ff1a1a" stroke-width="2.5" filter="url(#glow)"/>
-                    <path d="M50 80 Q55 92 60 100" fill="none" stroke="#ff1a1a" stroke-width="2.5" filter="url(#glow)"/>
-                    <path d="M50 80 Q50 90 50 100" fill="none" stroke="#ff1a1a" stroke-width="2" filter="url(#glow)"/>
-                    <circle cx="50" cy="48" r="14" fill="url(#bloodGrad)" filter="url(#glow)"/>
-                    <circle cx="50" cy="48" r="6" fill="#1a1a2e"/>
-                    <circle cx="47" cy="46" r="2" fill="#ff4444"/>
-                    <path d="M30 40 Q35 35 40 40" fill="none" stroke="#cc0000" stroke-width="1"/>
-                    <path d="M70 40 Q65 35 60 40" fill="none" stroke="#cc0000" stroke-width="1"/>
-                    <path d="M25 55 Q35 58 40 53" fill="none" stroke="#cc0000" stroke-width="1"/>
-                    <path d="M75 55 Q65 58 60 53" fill="none" stroke="#cc0000" stroke-width="1"/>
-                    <line x1="50" y1="28" x2="50" y2="20" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
-                    <line x1="50" y1="68" x2="50" y2="76" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
-                    <line x1="28" y1="48" x2="20" y2="48" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
-                    <line x1="72" y1="48" x2="80" y2="48" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
+                    <!-- dış halka - nmap tarzı -->
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#e94560" stroke-width="2.5" filter="url(#glow)"/>
+                    <circle cx="50" cy="50" r="34" fill="none" stroke="#e94560" stroke-width="0.5" opacity="0.5"/>
+                    <!-- hedef çizgileri -->
+                    <line x1="50" y1="10" x2="50" y2="20" stroke="#e94560" stroke-width="1.5" filter="url(#glow)"/>
+                    <line x1="50" y1="80" x2="50" y2="90" stroke="#e94560" stroke-width="1.5" filter="url(#glow)"/>
+                    <line x1="10" y1="50" x2="20" y2="50" stroke="#e94560" stroke-width="1.5" filter="url(#glow)"/>
+                    <line x1="80" y1="50" x2="90" y2="50" stroke="#e94560" stroke-width="1.5" filter="url(#glow)"/>
+                    <line x1="22" y1="22" x2="28" y2="28" stroke="#e94560" stroke-width="1"/>
+                    <line x1="78" y1="22" x2="72" y2="28" stroke="#e94560" stroke-width="1"/>
+                    <line x1="22" y1="78" x2="28" y2="72" stroke="#e94560" stroke-width="1"/>
+                    <line x1="78" y1="78" x2="72" y2="72" stroke="#e94560" stroke-width="1"/>
+                    <!-- göz beyazı - kızarmış -->
+                    <ellipse cx="50" cy="50" rx="25" ry="22" fill="#2d0000" stroke="#e94560" stroke-width="1.5"/>
+                    <!-- damarlar -->
+                    <path d="M28 40 Q32 35 40 38" fill="none" stroke="#cc0000" stroke-width="1" opacity="0.8"/>
+                    <path d="M72 40 Q68 35 60 38" fill="none" stroke="#cc0000" stroke-width="1" opacity="0.8"/>
+                    <path d="M26 55 Q35 58 40 52" fill="none" stroke="#cc0000" stroke-width="1" opacity="0.8"/>
+                    <path d="M74 55 Q65 58 60 52" fill="none" stroke="#cc0000" stroke-width="1" opacity="0.8"/>
+                    <path d="M30 48 Q38 44 42 50" fill="none" stroke="#990000" stroke-width="0.8" opacity="0.6"/>
+                    <path d="M70 48 Q62 44 58 50" fill="none" stroke="#990000" stroke-width="0.8" opacity="0.6"/>
+                    <!-- iris -->
+                    <circle cx="50" cy="50" r="14" fill="url(#irisGrad)" filter="url(#glow)"/>
+                    <!-- pupil - yırtık / tehditkar -->
+                    <ellipse cx="50" cy="50" rx="6" ry="7" fill="#000000"/>
+                    <ellipse cx="50" cy="50" rx="4" ry="5" fill="#111111"/>
+                    <!-- iris detay -->
+                    <circle cx="50" cy="50" r="10" fill="none" stroke="#ff3333" stroke-width="0.5" opacity="0.5"/>
+                    <!-- ışık yansıması -->
+                    <circle cx="46" cy="46" r="2.5" fill="#ff6666" opacity="0.7"/>
+                    <!-- kaş - çatık -->
+                    <path d="M22 28 L42 35" stroke="#e94560" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
+                    <path d="M78 28 L58 35" stroke="#e94560" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
                 </svg>
                 <span class="logo-text">Blood<span class="logo-accent">Eye</span></span>
             </div>
