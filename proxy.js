@@ -29,7 +29,18 @@ app.get("/abuse", async (req, res) => {
         res.json(data);
     } catch(e) { res.status(500).json({ error: e.message }); }
 });
-
+app.get("/vt", async (req, res) => {
+    const ip = req.query.ip;
+    const key = process.env.VT_TOKEN;
+    if (!ip) return res.status(400).json({ error: "ip gerekli" });
+    try {
+        const response = await fetch(`https://www.virustotal.com/api/v3/ip_addresses/${ip}`, {
+            headers: { "x-apikey": key, "Accept": "application/json" }
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch(e) { res.status(500).json({ error: e.message }); }
+});
 app.get("/", (req, res) => {
     res.send("BloodEye Proxy - Running");
 });
