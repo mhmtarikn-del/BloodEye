@@ -1,4 +1,4 @@
-// v13 - regex + benzersiz IP + xls export
+// v14 - virustotal eklendi
 document.getElementById("sorguBtn").addEventListener("click", sorgula);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
 
@@ -50,11 +50,12 @@ async function sorgula() {
     btn.disabled = false;
     btn.textContent = "Sorgula";
     exportBtn.style.display = "block";
+        document.getElementById("vtBtn").style.display = "block";
 }
 
 function tabloOlustur(veriler) {
     let html = "<table>";
-    html += "<tr><th>IP</th><th>Ülke</th><th>ISP/Org</th><th>ipinfo</th><th>AbuseIPDB</th><th></th></tr>";
+    html += "<tr><th>IP</th><th>Ülke</th><th>ISP/Org</th><th>ipinfo</th><th>AbuseIPDB</th><th>VT</th><th></th></tr>";
 
     veriler.forEach((v, index) => {
         const infoPuan = infoSusPuan(v);
@@ -69,6 +70,7 @@ function tabloOlustur(veriler) {
         html += `<td>${(v.ipInfo && v.ipInfo.org) || "-"}</td>`;
         html += `<td class="${infoSinif}">%${infoPuan}</td>`;
         html += `<td class="${abuseSinif}">%${abusePuan}</td>`;
+        html += `<td id="vt-${index}">-</td>`;
         html += `<td><button class="detayBtn" onclick="detayGoster(${index})">Detay</button></td>`;
         html += "</tr>";
     });
@@ -161,7 +163,45 @@ function exportCSV() {
     link.download = "ip_sorgu_sonuc.xls";
     link.click();
 }
+async function vtTara() {
+    const btn = document.getElementById("vtBtn");
+    btn.disabled = true;
+    let count = 0;
 
+    for (let i = 0; i < sonVeriler.length; i++) {
+        const v = sonVeriler[i];
+        btn.textContent = `VT: ${i+1}/${sonVeriler.length}`;
+
+        try {
+            const res = await fetch(`https://bloodeye-proxy.onrender.com/vt?ip=${v.ip}`).then(r => r.json());
+            if (res.data) {
+                const malicious = res.data.attributes.last_analysis_stats.malicious || 0;
+                const total = Object.values(res.data.attributes.last_analysis_stats).reduce((a,b) => a+b, 0);
+                document.getElementById(`vt-${i}`).textContent = `${malicious}/${total}`;
+                if (malicious > 0) {
+                    document.getElementById(`vt-${i}`).style.color = "#ff4444";
+                    document.getElementById(`vt-${i}`).style.fontWeight = "bold";
+                } else {
+                    document.getElementById(`vt-${i}`).style.color = "#44ff44";
+                }
+            }
+        } catch(e) {
+            document.getElementById(`vt-${i}`).textContent = "Hata";
+        }
+
+        count++;
+        if (count >= 4) {
+            btn.textContent = `VT: ${i+1}/${sonVeriler.length} (bekleniyor...)`;
+            await new Promise(r => setTimeout(r, 60000));
+            count = 0;
+        } else {
+            await new Promise(r => setTimeout(r, 15000));
+        }
+    }
+
+    btn.textContent = "VT Tarama Tamam";
+    btn.disabled = false;
+}
 function kopyala(id) {
     const textarea = document.getElementById(id);
     textarea.select();
