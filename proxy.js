@@ -5,6 +5,7 @@ const app = express();
 const IPINFO_TOKEN = process.env.IPINFO_TOKEN;
 const ABUSE_TOKEN = process.env.ABUSE_TOKEN;
 const IPQS_TOKEN = process.env.IPQS_TOKEN;
+const VT_TOKEN = process.env.VT_TOKEN;
 
 app.use(cors());
 
