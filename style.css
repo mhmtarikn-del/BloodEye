@@ -312,3 +312,58 @@ tr:hover {
 .copyBtn:hover {
     background: #e94560;
 }
+
+.vt-baslik {
+    background: #0d2e0d;
+    border: 1px solid #4CAF50;
+    padding: 12px 15px;
+    border-radius: 8px 8px 0 0;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vt-durum {
+    font-weight: normal;
+    font-size: 12px;
+    color: #aaa;
+}
+
+#vtSonuc {
+    background: #16213e;
+    border: 1px solid #4CAF50;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.vt-satir {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-bottom: 1px solid #0f3460;
+    font-size: 13px;
+    font-family: 'Consolas', monospace;
+}
+
+.vt-satir:last-child {
+    border-bottom: none;
+}
+
+.vt-temiz {
+    color: #44ff44;
+}
+
+.vt-supheli {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.vt-bekliyor {
+    color: #ffaa00;
+}
