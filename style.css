@@ -148,6 +148,23 @@ tr:hover {
     background: #e94560;
 }
 
+.vtDetayBtn {
+    width: 100%;
+    padding: 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.vtDetayBtn:hover {
+    background: #388E3C;
+}
+
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -157,8 +174,10 @@ tr:hover {
     background: rgba(0,0,0,0.85);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     z-index: 1000;
+    padding: 30px 10px;
+    overflow-y: auto;
 }
 
 .popup {
@@ -167,9 +186,12 @@ tr:hover {
     border-radius: 10px;
     max-width: 700px;
     width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
     position: relative;
+}
+
+.popup-vt {
+    max-width: 900px;
+    width: 95%;
 }
 
 .popup h2 {
@@ -366,4 +388,91 @@ tr:hover {
 
 .vt-bekliyor {
     color: #ffaa00;
+}
+
+/* VT Detay Panel Stilleri */
+.vt-detay-kart {
+    background: #0d1730;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.vt-detay-baslik {
+    background: #0f3460;
+    padding: 12px 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+.vt-detay-baslik:hover {
+    background: #1a2a4a;
+}
+
+.vt-detay-ip {
+    font-family: 'Consolas', monospace;
+    font-size: 15px;
+}
+
+.vt-detay-ozet {
+    font-size: 13px;
+    display: flex;
+    gap: 15px;
+}
+
+.vt-detay-icerik {
+    display: none;
+    padding: 15px;
+    border-top: 1px solid #0f3460;
+}
+
+.vt-detay-icerik.acik {
+    display: block;
+}
+
+.vt-bilgi-satir {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #0f3460;
+    font-size: 13px;
+}
+
+.vt-bilgi-satir:last-child {
+    border-bottom: none;
+}
+
+.vt-etiket {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin: 2px;
+    background: #3d1111;
+    color: #ff6666;
+}
+
+.vt-etiket.temiz {
+    background: #0d2e0d;
+    color: #66ff66;
+}
+
+.vt-domain-list {
+    max-height: 150px;
+    overflow-y: auto;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    background: #0a0a1e;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.vt-domain-item {
+    padding: 3px 0;
+    border-bottom: 1px solid #111;
 }
