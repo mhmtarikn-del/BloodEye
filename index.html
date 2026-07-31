@@ -3,144 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BloodEye - IP Sorgu</title>
+    <title>BloodEye - Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%231a1a2e' stroke='%23e94560' stroke-width='3'/><circle cx='50' cy='48' r='16' fill='%23990000'/><circle cx='50' cy='48' r='7' fill='%23000'/><circle cx='46' cy='44' r='3' fill='%23ff4444'/><path d='M20 30 L40 38' stroke='%23e94560' stroke-width='3' stroke-linecap='round'/><path d='M80 30 L60 38' stroke='%23e94560' stroke-width='3' stroke-linecap='round'/></svg>">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Üst Menü -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <svg width="35" height="35" viewBox="0 0 100 100">
-                    <defs>
-                        <filter id="navglow">
-                            <feGaussianBlur stdDeviation="2" result="blur"/>
-                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                        <radialGradient id="navGrad" cx="50%" cy="50%">
-                            <stop offset="0%" stop-color="#ff1a1a"/>
-                            <stop offset="100%" stop-color="#8b0000"/>
-                        </radialGradient>
-                    </defs>
-                    <line x1="20" y1="20" x2="40" y2="28" stroke="#e94560" stroke-width="3" filter="url(#navglow)"/>
-                    <line x1="80" y1="20" x2="60" y2="28" stroke="#e94560" stroke-width="3" filter="url(#navglow)"/>
-                    <ellipse cx="50" cy="50" rx="30" ry="28" fill="none" stroke="#e94560" stroke-width="3" filter="url(#navglow)"/>
-                    <circle cx="50" cy="48" r="13" fill="url(#navGrad)" filter="url(#navglow)"/>
-                    <circle cx="50" cy="48" r="5.5" fill="#1a1a2e"/>
-                    <circle cx="47" cy="46" r="2" fill="#ff4444"/>
+    <div class="app-container">
+        <!-- Sağ Menü -->
+        <nav class="side-menu">
+            <div class="menu-logo">
+                <svg width="30" height="30" viewBox="0 0 100 100">
+                    <ellipse cx="50" cy="50" rx="28" ry="26" fill="none" stroke="#e94560" stroke-width="3"/>
+                    <circle cx="50" cy="48" r="12" fill="#8b0000"/>
+                    <circle cx="50" cy="48" r="5" fill="#1a1a2e"/>
+                    <circle cx="47" cy="46" r="1.5" fill="#ff4444"/>
+                    <line x1="20" y1="22" x2="38" y2="30" stroke="#e94560" stroke-width="2.5"/>
+                    <line x1="80" y1="22" x2="62" y2="30" stroke="#e94560" stroke-width="2.5"/>
                 </svg>
-                <span class="nav-title">Blood<span style="color:#e94560;">Eye</span></span>
+                <span>Blood<span style="color:#e94560;">Eye</span></span>
             </div>
-            <div class="nav-tabs">
-                <button class="nav-tab active" onclick="sekmeGoster('home')">🏠 Home</button>
-                <button class="nav-tab" onclick="sekmeGoster('detector')">🔍 IP Dedektörü</button>
-            </div>
-        </div>
-    </nav>
+            <button class="menu-btn active" onclick="sayfaGoster('dashboard')">📊 Dashboard</button>
+            <button class="menu-btn" onclick="sayfaGoster('detector')">🔍 IP Dedektörü</button>
+            <button class="menu-btn disabled">📋 Tehdit Analizi</button>
+            <button class="menu-btn disabled">📜 Log İzleyici</button>
+            <button class="menu-btn disabled">⚙️ Ayarlar</button>
+            <div class="versiyon">v0.17</div>
+        </nav>
 
-    <!-- Ana İçerik -->
-    <div class="main-content">
-        <!-- Home Sekmesi -->
-        <div id="sekme-home" class="sekme active">
-            <div class="dashboard">
-                <h1 class="dashboard-title">BloodEye Dashboard</h1>
-                <div class="dashboard-grid">
-                    <div class="dashboard-card" onclick="sekmeGoster('detector')">
-                        <div class="card-icon">🔍</div>
-                        <div class="card-title">IP Dedektörü</div>
-                        <div class="card-desc">Toplu IP sorgulama, AbuseIPDB, ipinfo ve Virustotal entegrasyonu</div>
+        <!-- Ana İçerik -->
+        <main class="content-area">
+            <!-- Dashboard -->
+            <div id="sayfa-dashboard" class="sayfa active">
+                <div class="db-grid">
+                    <div class="db-card db-genis">
+                        <h3>📈 Haftalık Tarama Geçmişi</h3>
+                        <div class="chart-container">
+                            <canvas id="chartHaftalik"></canvas>
+                        </div>
                     </div>
-                    <div class="dashboard-card disabled">
-                        <div class="card-icon">📊</div>
-                        <div class="card-title">Tehdit Analizi</div>
-                        <div class="card-desc">Yakında...</div>
+                    <div class="db-card">
+                        <h3>⚠️ Saldırı Seviyesi (24s)</h3>
+                        <div class="risk-gauge">
+                            <div class="gauge-circle" id="gaugeCircle">
+                                <span id="gaugeText">%0</span>
+                            </div>
+                            <p id="gaugeDetay">0/0 IP</p>
+                        </div>
                     </div>
-                    <div class="dashboard-card disabled">
-                        <div class="card-icon">📋</div>
-                        <div class="card-title">Log İzleyici</div>
-                        <div class="card-desc">Yakında...</div>
+                    <div class="db-card">
+                        <h3>🔴 Kritik IP'ler (7 gün)</h3>
+                        <div class="kritik-list" id="kritikList">
+                            <p class="bos">Henüz veri yok</p>
+                        </div>
                     </div>
-                    <div class="dashboard-card disabled">
-                        <div class="card-icon">⚙️</div>
-                        <div class="card-title">Ayarlar</div>
-                        <div class="card-desc">Yakında...</div>
+                    <div class="db-card">
+                        <h3>📊 Özet İstatistikler</h3>
+                        <div class="istatistik" id="istatistikler">
+                            <div class="ist-satir"><span>Toplam tarama:</span><span id="istToplam">0</span></div>
+                            <div class="ist-satir"><span>Temiz:</span><span id="istTemiz" style="color:#44ff44;">0</span></div>
+                            <div class="ist-satir"><span>Şüpheli:</span><span id="istSupheli" style="color:#ff4444;">0</span></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- IP Dedektörü Sekmesi -->
-        <div id="sekme-detector" class="sekme">
-            <div class="container">
-                <div class="header">
-                    <div class="logo">
-                        <svg width="55" height="55" viewBox="0 0 100 100">
-                            <defs>
-                                <filter id="glow">
-                                    <feGaussianBlur stdDeviation="2.5" result="blur"/>
-                                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                </filter>
-                                <radialGradient id="bloodGrad" cx="50%" cy="50%">
-                                    <stop offset="0%" stop-color="#ff1a1a"/>
-                                    <stop offset="100%" stop-color="#8b0000"/>
-                                </radialGradient>
-                            </defs>
-                            <line x1="20" y1="20" x2="40" y2="28" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
-                            <line x1="80" y1="20" x2="60" y2="28" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
-                            <ellipse cx="50" cy="50" rx="32" ry="30" fill="none" stroke="#e94560" stroke-width="3" filter="url(#glow)"/>
-                            <path d="M50 80 Q45 92 40 100" fill="none" stroke="#ff1a1a" stroke-width="2.5" filter="url(#glow)"/>
-                            <path d="M50 80 Q55 92 60 100" fill="none" stroke="#ff1a1a" stroke-width="2.5" filter="url(#glow)"/>
-                            <path d="M50 80 Q50 90 50 100" fill="none" stroke="#ff1a1a" stroke-width="2" filter="url(#glow)"/>
-                            <circle cx="50" cy="48" r="14" fill="url(#bloodGrad)" filter="url(#glow)"/>
-                            <circle cx="50" cy="48" r="6" fill="#1a1a2e"/>
-                            <circle cx="47" cy="46" r="2" fill="#ff4444"/>
-                            <path d="M30 40 Q35 35 40 40" fill="none" stroke="#cc0000" stroke-width="1"/>
-                            <path d="M70 40 Q65 35 60 40" fill="none" stroke="#cc0000" stroke-width="1"/>
-                            <path d="M25 55 Q35 58 40 53" fill="none" stroke="#cc0000" stroke-width="1"/>
-                            <path d="M75 55 Q65 58 60 53" fill="none" stroke="#cc0000" stroke-width="1"/>
-                            <line x1="50" y1="28" x2="50" y2="20" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
-                            <line x1="50" y1="68" x2="50" y2="76" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
-                            <line x1="28" y1="48" x2="20" y2="48" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
-                            <line x1="72" y1="48" x2="80" y2="48" stroke="#e94560" stroke-width="1" filter="url(#glow)"/>
-                        </svg>
-                        <span class="logo-text">Blood<span class="logo-accent">Eye</span></span>
+            <!-- IP Dedektörü -->
+            <div id="sayfa-detector" class="sayfa">
+                <div class="container">
+                    <textarea id="ipInput" placeholder="İp adresi içeren metinleri girin...&#10;Örn:&#10;8.8.8.8 Google DNS&#10;1.1.1.1 Cloudflare"></textarea>
+                    <button id="sorguBtn">Sorgula</button>
+                    <button id="exportBtn" style="display:none; background:#0f3460;">Excel'e Aktar</button>
+                    <button id="vtDetayBtn" style="display:none; background:#4CAF50;" onclick="vtDetayPanel()">🛡️ VT Detay Raporu</button>
+                    <div id="sonuc"></div>
+                    <div id="vtPanel" style="display:none;">
+                        <div class="vt-baslik">🛡️ Virustotal Tarama <span id="vtDurum" class="vt-durum">Bekleniyor...</span></div>
+                        <div id="vtSonuc"></div>
                     </div>
-                </div>
-                <textarea id="ipInput" placeholder="İp adresi içeren metinleri girin...&#10;Örn:&#10;8.8.8.8 Google DNS&#10;1.1.1.1 Cloudflare"></textarea>
-                <div class="versiyon">v0.16</div>
-                <button id="sorguBtn">Sorgula</button>
-                <button id="exportBtn" style="display:none; background:#0f3460;">Excel'e Aktar</button>
-                <button id="vtDetayBtn" style="display:none; background:#4CAF50;" onclick="vtDetayPanel()">🛡️ VT Detay Raporu</button>
-                <div id="sonuc"></div>
-                <div id="vtPanel" style="display:none;">
-                    <div class="vt-baslik">
-                        🛡️ Virustotal Tarama
-                        <span id="vtDurum" class="vt-durum">Bekleniyor...</span>
-                    </div>
-                    <div id="vtSonuc"></div>
-                </div>
-                <div id="listeler" style="display:none;">
-                    <div class="liste-kutu blacklist">
-                        <div class="liste-baslik">
-                            ⛔ Black List <span class="liste-aciklama">(AbuseIPDB ≥20 veya ipinfo ≥20)</span>
-                            <button class="copyBtn" onclick="kopyala('blacklist')">📋 Kopyala</button>
+                    <div id="listeler" style="display:none;">
+                        <div class="liste-kutu blacklist">
+                            <div class="liste-baslik">⛔ Black List <span class="liste-aciklama">(≥20)</span><button class="copyBtn" onclick="kopyala('blacklist')">📋</button></div>
+                            <textarea id="blacklist" readonly></textarea>
                         </div>
-                        <textarea id="blacklist" readonly placeholder="Black list IP'leri burada görünür..."></textarea>
-                    </div>
-                    <div class="liste-kutu whitelist">
-                        <div class="liste-baslik">
-                            ✅ White List <span class="liste-aciklama">(Tüm puanlar &lt;20)</span>
-                            <button class="copyBtn" onclick="kopyala('whitelist')">📋 Kopyala</button>
+                        <div class="liste-kutu whitelist">
+                            <div class="liste-baslik">✅ White List <span class="liste-aciklama">(<20)</span><button class="copyBtn" onclick="kopyala('whitelist')">📋</button></div>
+                            <textarea id="whitelist" readonly></textarea>
                         </div>
-                        <textarea id="whitelist" readonly placeholder="White list IP'leri burada görünür..."></textarea>
                     </div>
+                    <footer class="footer">Created by <span class="footer-name">Tarkovic</span></footer>
                 </div>
-                <footer class="footer">Created by <span class="footer-name">Tarkovic</span></footer>
             </div>
-        </div>
+        </main>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
