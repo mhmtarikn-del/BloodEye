@@ -475,3 +475,10 @@ tr:hover {
     padding: 3px 0;
     border-bottom: 1px solid #111;
 }
+.versiyon {
+    text-align: right;
+    font-size: 10px;
+    color: #444;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
