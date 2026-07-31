@@ -11,8 +11,9 @@ body {
 
 /* Sağ Menü */
 .side-menu {
-    width: 20%;
+    width: 200px;
     min-width: 200px;
+    max-width: 200px;
     background: #0d1730;
     border-left: 2px solid #e94560;
     padding: 20px 15px;
@@ -20,6 +21,7 @@ body {
     flex-direction: column;
     gap: 8px;
     order: 2;
+    flex-shrink: 0;
 }
 
 .menu-logo {
@@ -62,19 +64,35 @@ body {
     cursor: not-allowed;
 }
 
-.versiyon {
+.menu-footer {
     margin-top: auto;
     text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #0f3460;
+}
+
+.versiyon {
     font-size: 10px;
     color: #444;
-    padding-top: 15px;
+    margin-bottom: 4px;
+}
+
+.built-by {
+    font-size: 10px;
+    color: #444;
+}
+
+.footer-name {
+    color: #e94560;
+    font-weight: bold;
 }
 
 /* Ana İçerik */
 .content-area {
-    width: 80%;
+    flex: 1;
     padding: 25px;
     order: 1;
+    overflow-y: auto;
 }
 
 .sayfa { display:none; }
@@ -104,17 +122,32 @@ body {
 
 /* Chart */
 .chart-container {
-    height: 200px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #aaa;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 5px;
 }
 
 /* Risk Gauge */
-.risk-gauge {
-    text-align: center;
-}
-
+.risk-gauge { text-align:center; }
 .gauge-circle {
     width: 120px;
     height: 120px;
@@ -128,28 +161,29 @@ body {
     font-weight: bold;
     transition: border-color 0.5s;
 }
-
-#gaugeDetay {
-    font-size: 12px;
-    color: #888;
-}
+#gaugeDetay { font-size:12px; color:#888; }
 
 /* Kritik Liste */
 .kritik-list {
-    max-height: 180px;
+    max-height: 350px;
     overflow-y: auto;
     font-family: 'Consolas', monospace;
     font-size: 12px;
 }
-
 .kritik-item {
     padding: 6px 8px;
     border-bottom: 1px solid #0f3460;
-    color: #ff6666;
     display: flex;
     justify-content: space-between;
 }
-
+.kritik-item.supheli { color:#ff6666; }
+.kritik-item.temiz { color:#40e0d0; }
+.kritik-gun {
+    font-size: 11px;
+    color: #e94560;
+    padding: 8px 8px 4px;
+    font-weight: bold;
+}
 .bos { color:#666; text-align:center; padding:20px; }
 
 /* İstatistik */
@@ -160,7 +194,6 @@ body {
     border-bottom: 1px solid #0f3460;
     font-size: 14px;
 }
-
 .ist-satir:last-child { border-bottom:none; }
 
 /* IP Dedektörü */
@@ -208,7 +241,7 @@ tr:hover { background:#1a1a3e; }
 
 .sus-yuksek { color:#ff4444; font-weight:bold; }
 .sus-orta { color:#ffaa00; font-weight:bold; }
-.sus-dusuk { color:#44ff44; font-weight:bold; }
+.sus-dusuk { color:#40e0d0; font-weight:bold; }
 
 .hata { text-align:center; padding:30px; color:#ff4444; }
 .loading { text-align:center; padding:30px; color:#e94560; }
@@ -290,7 +323,7 @@ tr:hover { background:#1a1a3e; }
 }
 .liste-aciklama { font-weight:normal; font-size:11px; color:#aaa; flex:1; }
 .blacklist .liste-baslik { background:#3d1111; border:1px solid #e94560; border-bottom:none; }
-.whitelist .liste-baslik { background:#0d2e0d; border:1px solid #44ff44; border-bottom:none; }
+.whitelist .liste-baslik { background:#0d2e2e; border:1px solid #40e0d0; border-bottom:none; }
 .liste-kutu textarea {
     height: 100px;
     border-radius: 0 0 8px 8px;
@@ -299,16 +332,14 @@ tr:hover { background:#1a1a3e; }
     font-size: 13px;
 }
 .blacklist textarea { border-color:#e94560; color:#ff6666; }
-.whitelist textarea { border-color:#44ff44; color:#66ff66; }
+.whitelist textarea { border-color:#40e0d0; color:#40e0d0; }
 
-.footer { text-align:center; margin-top:30px; padding:15px; color:#666; font-size:13px; }
-.footer-name { color:#e94560; font-weight:bold; }
 .copyBtn { width:auto; padding:4px 8px; font-size:11px; background:#333; border-radius:4px; }
 .copyBtn:hover { background:#e94560; }
 
 .vt-baslik {
-    background: #0d2e0d;
-    border: 1px solid #4CAF50;
+    background: #0d2e2e;
+    border: 1px solid #40e0d0;
     padding: 12px 15px;
     border-radius: 8px 8px 0 0;
     font-weight: bold;
@@ -319,7 +350,7 @@ tr:hover { background:#1a1a3e; }
 .vt-durum { font-weight:normal; font-size:12px; color:#aaa; }
 #vtSonuc {
     background: #16213e;
-    border: 1px solid #4CAF50;
+    border: 1px solid #40e0d0;
     border-top: none;
     border-radius: 0 0 8px 8px;
     padding: 10px;
@@ -329,7 +360,7 @@ tr:hover { background:#1a1a3e; }
 }
 .vt-satir { display:flex; justify-content:space-between; padding:6px 10px; border-bottom:1px solid #0f3460; font-size:13px; font-family:'Consolas',monospace; }
 .vt-satir:last-child { border-bottom:none; }
-.vt-temiz { color:#44ff44; }
+.vt-temiz { color:#40e0d0; }
 .vt-supheli { color:#ff4444; font-weight:bold; }
 .vt-bekliyor { color:#ffaa00; }
 
@@ -347,9 +378,10 @@ tr:hover { background:#1a1a3e; }
 /* Responsive */
 @media (max-width: 768px) {
     .app-container { flex-direction:column; }
-    .side-menu { width:100%; min-width:auto; flex-direction:row; flex-wrap:wrap; gap:5px; padding:10px; border-left:none; border-bottom:2px solid #e94560; order:1; }
+    .side-menu { width:100%; min-width:auto; max-width:100%; flex-direction:row; flex-wrap:wrap; gap:5px; padding:10px; border-left:none; border-bottom:2px solid #e94560; order:1; }
     .menu-logo { display:none; }
     .menu-btn { width:auto; padding:8px 12px; font-size:12px; }
+    .menu-footer { display:none; }
     .content-area { width:100%; padding:15px; order:2; }
     .db-grid { grid-template-columns:1fr; }
 }

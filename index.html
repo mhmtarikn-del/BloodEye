@@ -27,7 +27,10 @@
             <button class="menu-btn disabled">📋 Tehdit Analizi</button>
             <button class="menu-btn disabled">📜 Log İzleyici</button>
             <button class="menu-btn disabled">⚙️ Ayarlar</button>
-            <div class="versiyon">v0.17</div>
+            <div class="menu-footer">
+                <div class="versiyon">v0.17</div>
+                <div class="built-by">Builded by <span class="footer-name">M.Tarık</span></div>
+            </div>
         </nav>
 
         <!-- Ana İçerik -->
@@ -39,6 +42,10 @@
                         <h3>📈 Haftalık Tarama Geçmişi</h3>
                         <div class="chart-container">
                             <canvas id="chartHaftalik"></canvas>
+                        </div>
+                        <div class="chart-legend">
+                            <span><span class="legend-dot" style="background:#40e0d0;"></span> Temiz</span>
+                            <span><span class="legend-dot" style="background:#ff4444;"></span> Kritik</span>
                         </div>
                     </div>
                     <div class="db-card">
@@ -60,7 +67,7 @@
                         <h3>📊 Özet İstatistikler</h3>
                         <div class="istatistik" id="istatistikler">
                             <div class="ist-satir"><span>Toplam tarama:</span><span id="istToplam">0</span></div>
-                            <div class="ist-satir"><span>Temiz:</span><span id="istTemiz" style="color:#44ff44;">0</span></div>
+                            <div class="ist-satir"><span>Temiz:</span><span id="istTemiz" style="color:#40e0d0;">0</span></div>
                             <div class="ist-satir"><span>Şüpheli:</span><span id="istSupheli" style="color:#ff4444;">0</span></div>
                         </div>
                     </div>
@@ -73,7 +80,7 @@
                     <textarea id="ipInput" placeholder="İp adresi içeren metinleri girin...&#10;Örn:&#10;8.8.8.8 Google DNS&#10;1.1.1.1 Cloudflare"></textarea>
                     <button id="sorguBtn">Sorgula</button>
                     <button id="exportBtn" style="display:none; background:#0f3460;">Excel'e Aktar</button>
-                    <button id="vtDetayBtn" style="display:none; background:#4CAF50;" onclick="vtDetayPanel()">🛡️ VT Detay Raporu</button>
+                    <button id="vtDetayBtn" style="display:none; background:#40e0d0; color:#000;" onclick="vtDetayPanel()">🛡️ VT Detay Raporu</button>
                     <div id="sonuc"></div>
                     <div id="vtPanel" style="display:none;">
                         <div class="vt-baslik">🛡️ Virustotal Tarama <span id="vtDurum" class="vt-durum">Bekleniyor...</span></div>
@@ -89,7 +96,6 @@
                             <textarea id="whitelist" readonly></textarea>
                         </div>
                     </div>
-                    <footer class="footer">Created by <span class="footer-name">Tarkovic</span></footer>
                 </div>
             </div>
         </main>

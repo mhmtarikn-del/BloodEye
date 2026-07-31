@@ -1,8 +1,7 @@
-// v0.17 - Dashboard + localStorage
+// v0.17 - Dashboard + localStorage + tooltip + turkuaz
 let sonVeriler = [];
 let vtHamVeriler = [];
 
-// Sayfa geçişi
 function sayfaGoster(sayfa) {
     document.querySelectorAll(".sayfa").forEach(s => s.classList.remove("active"));
     document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
@@ -11,7 +10,7 @@ function sayfaGoster(sayfa) {
     if (sayfa === "dashboard") dashboardGuncelle();
 }
 
-// localStorage yardımcı
+// localStorage
 function gecmisiGetir() {
     return JSON.parse(localStorage.getItem("bloodeye_gecmis") || "[]");
 }
@@ -23,49 +22,61 @@ function gecmiseEkle(kayit) {
     localStorage.setItem("bloodeye_gecmis", JSON.stringify(filtrelenmis));
 }
 
-// Dashboard güncelle
+// Dashboard
 function dashboardGuncelle() {
     const gecmis = gecmisiGetir();
     const simdi = Date.now();
     const son24s = simdi - 24 * 60 * 60 * 1000;
 
-    // Toplam tarama
     document.getElementById("istToplam").textContent = gecmis.length;
-
-    // Temiz / Şüpheli
     const temiz = gecmis.filter(k => !k.supheli).length;
     const supheli = gecmis.filter(k => k.supheli).length;
     document.getElementById("istTemiz").textContent = temiz;
     document.getElementById("istSupheli").textContent = supheli;
 
-    // Saldırı seviyesi (24s)
+    // Saldırı seviyesi
     const son24Kayit = gecmis.filter(k => k.tarih > son24s);
     const son24Supheli = son24Kayit.filter(k => k.supheli).length;
     const oran = son24Kayit.length > 0 ? Math.round((son24Supheli / son24Kayit.length) * 100) : 0;
-
     const gauge = document.getElementById("gaugeCircle");
-    const gaugeText = document.getElementById("gaugeText");
-    gaugeText.textContent = "%" + oran;
+    document.getElementById("gaugeText").textContent = "%" + oran;
     document.getElementById("gaugeDetay").textContent = `${son24Supheli}/${son24Kayit.length} IP`;
-
     if (oran >= 70) gauge.style.borderColor = "#ff4444";
     else if (oran >= 40) gauge.style.borderColor = "#ffaa00";
-    else gauge.style.borderColor = "#44ff44";
+    else gauge.style.borderColor = "#40e0d0";
 
-    // Kritik IP listesi
-    const kritikIPs = [...new Set(gecmis.filter(k => k.supheli).map(k => k.ip))];
+    // Kritik IP + 7 günlük liste
+    const son7Gun = simdi - 7 * 24 * 60 * 60 * 1000;
+    const son7Kayit = gecmis.filter(k => k.tarih > son7Gun);
+
+    // Güne göre grupla
+    const gunGruplari = {};
+    son7Kayit.forEach(k => {
+        const gun = new Date(k.tarih).toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
+        if (!gunGruplari[gun]) gunGruplari[gun] = [];
+        gunGruplari[gun].push(k);
+    });
+
     let kritikHtml = "";
-    if (kritikIPs.length === 0) {
-        kritikHtml = '<p class="bos">Henüz kritik IP yok</p>';
+    const gunSirasi = Object.keys(gunGruplari).sort((a,b) => {
+        return new Date(b.split(" ").slice(-2).join(" ")) - new Date(a.split(" ").slice(-2).join(" "));
+    });
+
+    if (gunSirasi.length === 0) {
+        kritikHtml = '<p class="bos">Henüz veri yok</p>';
     } else {
-        kritikIPs.slice(0, 10).forEach(ip => {
-            const adet = gecmis.filter(k => k.ip === ip && k.supheli).length;
-            kritikHtml += `<div class="kritik-item"><span>${ip}</span><span>${adet}x</span></div>`;
+        gunSirasi.forEach(gun => {
+            const kayitlar = gunGruplari[gun];
+            kritikHtml += `<div class="kritik-gun">📅 ${gun} (${kayitlar.length} IP)</div>`;
+            kayitlar.forEach(k => {
+                const cls = k.supheli ? "supheli" : "temiz";
+                const icon = k.supheli ? "🔴" : "🟢";
+                kritikHtml += `<div class="kritik-item ${cls}"><span>${icon} ${k.ip}</span><span>%${k.supheli ? k.abusePuan || k.infoPuan : 0}</span></div>`;
+            });
         });
     }
     document.getElementById("kritikList").innerHTML = kritikHtml;
 
-    // Haftalık grafik (basit bar)
     haftalikGrafikCiz(gecmis);
 }
 
@@ -93,34 +104,56 @@ function haftalikGrafikCiz(gecmis) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     canvas.width = canvas.parentElement.clientWidth - 20;
-    canvas.height = 180;
-
+    canvas.height = 200;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const barWidth = canvas.width / 18;
     const gap = barWidth * 0.4;
 
+    // Tooltip div'i
+    let tooltipDiv = document.getElementById("chartTooltip");
+    if (!tooltipDiv) {
+        tooltipDiv = document.createElement("div");
+        tooltipDiv.id = "chartTooltip";
+        tooltipDiv.style.cssText = "position:absolute;background:#0d1730;border:1px solid #e94560;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;display:none;z-index:100;white-space:nowrap;";
+        canvas.parentElement.appendChild(tooltipDiv);
+    }
+
+    canvas.onmousemove = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        let found = false;
+
+        for (let i = 0; i < 7; i++) {
+            const x = i * (barWidth * 2 + gap) + 30;
+            if (mx >= x && mx <= x + barWidth * 2) {
+                tooltipDiv.style.display = "block";
+                tooltipDiv.style.left = (rect.left + x + barWidth) + "px";
+                tooltipDiv.style.top = (rect.top + my - 50) + "px";
+                tooltipDiv.innerHTML = `<b>${gunler[i]}</b><br><span style="color:#40e0d0;">● Temiz: ${veri[i] - supheliVeri[i]}</span><br><span style="color:#ff4444;">● Kritik: ${supheliVeri[i]}</span>`;
+                found = true;
+                break;
+            }
+        }
+        if (!found) tooltipDiv.style.display = "none";
+    };
+    canvas.onmouseleave = function() { tooltipDiv.style.display = "none"; };
+
     for (let i = 0; i < 7; i++) {
         const x = i * (barWidth * 2 + gap) + 30;
-        const h = (veri[i] / max) * 130;
-        const sh = (supheliVeri[i] / max) * 130;
+        const h = (veri[i] / max) * 140;
+        const sh = (supheliVeri[i] / max) * 140;
 
-        // Temiz bar
-        ctx.fillStyle = "#44ff44";
+        ctx.fillStyle = "#40e0d0";
         ctx.fillRect(x, 150 - h, barWidth, h);
-
-        // Şüpheli bar
         ctx.fillStyle = "#ff4444";
         ctx.fillRect(x + barWidth, 150 - sh, barWidth, sh);
 
-        // Gün yazısı
         ctx.fillStyle = "#aaa";
         ctx.font = "10px Segoe UI";
         ctx.textAlign = "center";
         ctx.fillText(gunler[i], x + barWidth, 170);
-
-        // Sayı
-        ctx.fillText(veri[i], x + barWidth, 145 - h);
     }
 }
 
@@ -175,17 +208,10 @@ async function sorgula() {
     sonVeriler = sonuclar;
     vtHamVeriler = new Array(sonuclar.length).fill(null);
 
-    // Geçmişe kaydet
     sonuclar.forEach(v => {
-        const abusePuan = abuseSusPuan(v);
-        const infoPuan = infoSusPuan(v);
-        gecmiseEkle({
-            ip: v.ip,
-            tarih: Date.now(),
-            supheli: (abusePuan >= 20 || infoPuan >= 20),
-            abusePuan,
-            infoPuan
-        });
+        const ap = abuseSusPuan(v);
+        const ip = infoSusPuan(v);
+        gecmiseEkle({ ip: v.ip, tarih: Date.now(), supheli: (ap >= 20 || ip >= 20), abusePuan: ap, infoPuan: ip });
     });
 
     tabloOlustur(sonuclar);
@@ -201,17 +227,17 @@ function tabloOlustur(veriler) {
     html += "<tr><th>IP</th><th>Ülke</th><th>ISP/Org</th><th>ipinfo</th><th>AbuseIPDB</th><th>VT</th><th></th></tr>";
 
     veriler.forEach((v, index) => {
-        const infoPuan = infoSusPuan(v);
-        const abusePuan = abuseSusPuan(v);
-        const infoSinif = infoPuan >= 70 ? "sus-yuksek" : infoPuan >= 40 ? "sus-orta" : "sus-dusuk";
-        const abuseSinif = abusePuan >= 70 ? "sus-yuksek" : abusePuan >= 40 ? "sus-orta" : "sus-dusuk";
+        const ip = infoSusPuan(v);
+        const ap = abuseSusPuan(v);
+        const is = ip >= 70 ? "sus-yuksek" : ip >= 40 ? "sus-orta" : "sus-dusuk";
+        const as = ap >= 70 ? "sus-yuksek" : ap >= 40 ? "sus-orta" : "sus-dusuk";
 
         html += "<tr>";
         html += `<td>${v.ip}</td>`;
         html += `<td>${(v.ipInfo && v.ipInfo.country) || "-"}</td>`;
         html += `<td>${(v.ipInfo && v.ipInfo.org) || "-"}</td>`;
-        html += `<td class="${infoSinif}">%${infoPuan}</td>`;
-        html += `<td class="${abuseSinif}">%${abusePuan}</td>`;
+        html += `<td class="${is}">%${ip}</td>`;
+        html += `<td class="${as}">%${ap}</td>`;
         html += `<td id="vt-${index}" class="vt-bekliyor">...</td>`;
         html += `<td><button class="detayBtn" onclick="detayGoster(${index})">Detay</button></td>`;
         html += "</tr>";
@@ -240,31 +266,31 @@ async function vtOtomatikBaslat(veriler) {
     for (let i = 0; i < veriler.length; i++) {
         const v = veriler[i];
         durum.textContent = `Taranıyor: ${i+1}/${veriler.length}`;
-        const satirId = `vtsatir-${i}`;
-        sonucDiv.insertAdjacentHTML("beforeend", `<div id="${satirId}" class="vt-satir vt-bekliyor">${v.ip} → Bekleniyor...</div>`);
+        const sid = `vtsatir-${i}`;
+        sonucDiv.insertAdjacentHTML("beforeend", `<div id="${sid}" class="vt-satir vt-bekliyor">${v.ip} → Bekleniyor...</div>`);
 
         try {
             const res = await fetch(`https://bloodeye-proxy.onrender.com/vt?ip=${v.ip}`).then(r => r.json());
             vtHamVeriler[i] = res;
             if (res.data) {
                 const stats = res.data.attributes.last_analysis_stats;
-                const malicious = stats.malicious || 0;
-                const total = Object.values(stats).reduce((a,b) => a+b, 0);
-                document.getElementById(`vt-${i}`).textContent = `${malicious}/${total}`;
-                if (malicious > 0) {
+                const mal = stats.malicious || 0;
+                const tot = Object.values(stats).reduce((a,b) => a+b, 0);
+                document.getElementById(`vt-${i}`).textContent = `${mal}/${tot}`;
+                if (mal > 0) {
                     document.getElementById(`vt-${i}`).style.color = "#ff4444";
                     document.getElementById(`vt-${i}`).style.fontWeight = "bold";
-                    document.getElementById(satirId).className = "vt-satir vt-supheli";
-                    document.getElementById(satirId).textContent = `${v.ip} → ${malicious}/${total} ⚠️`;
+                    document.getElementById(sid).className = "vt-satir vt-supheli";
+                    document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ⚠️`;
                 } else {
-                    document.getElementById(`vt-${i}`).style.color = "#44ff44";
-                    document.getElementById(satirId).className = "vt-satir vt-temiz";
-                    document.getElementById(satirId).textContent = `${v.ip} → ${malicious}/${total} ✅`;
+                    document.getElementById(`vt-${i}`).style.color = "#40e0d0";
+                    document.getElementById(sid).className = "vt-satir vt-temiz";
+                    document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ✅`;
                 }
             }
         } catch(e) {
             document.getElementById(`vt-${i}`).textContent = "Hata";
-            document.getElementById(satirId).textContent = `${v.ip} → Hata`;
+            document.getElementById(sid).textContent = `${v.ip} → Hata`;
         }
         await new Promise(r => setTimeout(r, 15000));
     }
@@ -272,59 +298,51 @@ async function vtOtomatikBaslat(veriler) {
 }
 
 function vtDetayPanel() {
-    let html = `<div class="popup-overlay" onclick="this.remove()">`;
-    html += `<div class="popup popup-vt" onclick="event.stopPropagation()">`;
-    html += `<h2>🛡️ Virustotal Detay Raporu</h2>`;
-    html += `<button class="popup-close" onclick="document.querySelector('.popup-overlay').remove()">✕</button>`;
+    let h = `<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-vt" onclick="event.stopPropagation()">`;
+    h += `<h2>🛡️ Virustotal Detay Raporu</h2><button class="popup-close" onclick="document.querySelector('.popup-overlay').remove()">✕</button>`;
 
-    sonVeriler.forEach((v, i) => {
-        const vtData = vtHamVeriler[i];
-        html += `<div class="vt-detay-kart">`;
-        html += `<div class="vt-detay-baslik" onclick="this.nextElementSibling.classList.toggle('acik')">`;
-        if (vtData && vtData.data) {
-            const stats = vtData.data.attributes.last_analysis_stats;
-            const malicious = stats.malicious || 0;
-            const total = Object.values(stats).reduce((a,b) => a+b, 0);
-            const renk = malicious > 0 ? "#ff4444" : "#44ff44";
-            html += `<span class="vt-detay-ip">${v.ip}</span><span class="vt-detay-ozet"><span style="color:${renk}">${malicious}/${total}</span><span>▼</span></span>`;
-        } else {
-            html += `<span class="vt-detay-ip">${v.ip}</span><span style="color:#ffaa00;">Veri yok</span>`;
-        }
-        html += `</div><div class="vt-detay-icerik">`;
-        if (vtData && vtData.data) {
-            const attr = vtData.data.attributes;
-            const stats = attr.last_analysis_stats;
-            const results = attr.last_analysis_results || {};
-            const total = Object.values(stats).reduce((a,b) => a+b, 0);
-            html += `<div class="vt-bilgi-satir"><span>Toplam:</span><span>${total}</span></div>`;
-            html += `<div class="vt-bilgi-satir"><span>Zararlı:</span><span style="color:#ff4444;">${stats.malicious||0}</span></div>`;
-            html += `<div class="vt-bilgi-satir"><span>Şüpheli:</span><span style="color:#ffaa00;">${stats.suspicious||0}</span></div>`;
-            html += `<div class="vt-bilgi-satir"><span>Temiz:</span><span style="color:#44ff44;">${stats.harmless||0}</span></div>`;
-            const malEngines = Object.entries(results).filter(([k,v])=>v.category==="malicious");
-            if (malEngines.length > 0) {
-                html += `<h4 style="color:#ff4444;margin-top:10px;">⚠️ Zararlı Tespit:</h4>`;
-                malEngines.forEach(([m,d]) => html += `<span class="vt-etiket">${m}: ${d.result||"zararlı"}</span>`);
+    sonVeriler.forEach((v,i) => {
+        const vd = vtHamVeriler[i];
+        h += `<div class="vt-detay-kart"><div class="vt-detay-baslik" onclick="this.nextElementSibling.classList.toggle('acik')">`;
+        if (vd && vd.data) {
+            const s = vd.data.attributes.last_analysis_stats;
+            const mal = s.malicious || 0;
+            const tot = Object.values(s).reduce((a,b) => a+b, 0);
+            h += `<span class="vt-detay-ip">${v.ip}</span><span class="vt-detay-ozet"><span style="color:${mal>0?'#ff4444':'#40e0d0'}">${mal}/${tot}</span><span>▼</span></span>`;
+        } else h += `<span class="vt-detay-ip">${v.ip}</span><span style="color:#ffaa00;">Veri yok</span>`;
+        h += `</div><div class="vt-detay-icerik">`;
+        if (vd && vd.data) {
+            const attr = vd.data.attributes;
+            const s = attr.last_analysis_stats;
+            const res = attr.last_analysis_results || {};
+            const tot = Object.values(s).reduce((a,b) => a+b, 0);
+            h += `<div class="vt-bilgi-satir"><span>Toplam:</span><span>${tot}</span></div>`;
+            h += `<div class="vt-bilgi-satir"><span>Zararlı:</span><span style="color:#ff4444;">${s.malicious||0}</span></div>`;
+            h += `<div class="vt-bilgi-satir"><span>Şüpheli:</span><span style="color:#ffaa00;">${s.suspicious||0}</span></div>`;
+            h += `<div class="vt-bilgi-satir"><span>Temiz:</span><span style="color:#40e0d0;">${s.harmless||0}</span></div>`;
+            const malE = Object.entries(res).filter(([k,v])=>v.category==="malicious");
+            if (malE.length) {
+                h += `<h4 style="color:#ff4444;margin-top:10px;">⚠️ Zararlı:</h4>`;
+                malE.forEach(([m,d]) => h += `<span class="vt-etiket">${m}: ${d.result||"zararlı"}</span>`);
             }
-        } else {
-            html += `<p style="color:#ffaa00;">VT verisi henüz alınamadı.</p>`;
-        }
-        html += `</div></div>`;
+        } else h += `<p style="color:#ffaa00;">VT verisi henüz alınamadı.</p>`;
+        h += `</div></div>`;
     });
-    html += `</div></div>`;
-    document.body.insertAdjacentHTML("beforeend", html);
+    h += `</div></div>`;
+    document.body.insertAdjacentHTML("beforeend", h);
 }
 
 function infoSusPuan(v) {
-    let puan = 0;
-    const ipInfo = v.ipInfo;
-    if (!ipInfo) return 0;
-    if (ipInfo.org) {
-        const o = ipInfo.org.toLowerCase();
-        if (o.includes("hosting")||o.includes("vps")||o.includes("server")||o.includes("cloud")) puan+=30;
-        if (o.includes("vpn")||o.includes("proxy")||o.includes("tor")) puan+=30;
+    let p = 0;
+    const ip = v.ipInfo;
+    if (!ip) return 0;
+    if (ip.org) {
+        const o = ip.org.toLowerCase();
+        if (o.includes("hosting")||o.includes("vps")||o.includes("server")||o.includes("cloud")) p+=30;
+        if (o.includes("vpn")||o.includes("proxy")||o.includes("tor")) p+=30;
     }
-    if (ipInfo.country && ["RU","CN","KP","IR","NG"].includes(ipInfo.country)) puan+=15;
-    return Math.min(puan,100);
+    if (ip.country && ["RU","CN","KP","IR","NG"].includes(ip.country)) p+=15;
+    return Math.min(p,100);
 }
 
 function abuseSusPuan(v) {
@@ -370,5 +388,4 @@ function kopyala(id) {
     setTimeout(()=>{btn.textContent="📋";},1500);
 }
 
-// İlk yüklemede dashboard güncelle
 dashboardGuncelle();
