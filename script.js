@@ -84,7 +84,10 @@ function haftalikGrafikCiz(gecmis) {
     const gunler = [];
     for (let i = 6; i >= 0; i--) {
         const gun = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-        gunler.push(gun.toLocaleDateString("tr-TR", { weekday: "short" }));
+        const gunAdi = gun.getDate().toString().padStart(2,"0");
+const ayAdi = gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase();
+const yil = gun.getFullYear();
+gunler.push(`${gunAdi} ${ayAdi} ${yil}`);
     }
 
     const veri = [0,0,0,0,0,0,0];
@@ -389,3 +392,20 @@ function kopyala(id) {
 }
 
 dashboardGuncelle();
+function sifirlaPopup() {
+    let h = `<div class="popup-overlay" onclick="this.remove()">`;
+    h += `<div class="popup popup-reset" onclick="event.stopPropagation()">`;
+    h += `<h2>⚠️ Tüm Verileri Sıfırla</h2>`;
+    h += `<p>Dashboard verileri ve tarama geçmişi kalıcı olarak silinecek. Bu işlem geri alınamaz.</p>`;
+    h += `<div class="btn-group">`;
+    h += `<button class="btn-tamam" onclick="sifirlaOnay()">Tamam</button>`;
+    h += `<button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button>`;
+    h += `</div></div></div>`;
+    document.body.insertAdjacentHTML("beforeend", h);
+}
+
+function sifirlaOnay() {
+    localStorage.removeItem("bloodeye_gecmis");
+    document.querySelectorAll(".popup-overlay").forEach(p => p.remove());
+    dashboardGuncelle();
+}

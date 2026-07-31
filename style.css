@@ -385,3 +385,31 @@ tr:hover { background:#1a1a3e; }
     .content-area { width:100%; padding:15px; order:2; }
     .db-grid { grid-template-columns:1fr; }
 }
+.reset-btn {
+    width: auto;
+    padding: 10px 30px;
+    background: #3d1111;
+    color: #ff6666;
+    border: 1px solid #ff4444;
+    font-size: 14px;
+}
+.reset-btn:hover { background:#5d1111; }
+
+.popup-reset {
+    text-align: center;
+}
+.popup-reset p {
+    margin-bottom: 20px;
+    color: #ffaa00;
+}
+.popup-reset .btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.popup-reset .btn-group button {
+    width: auto;
+    padding: 8px 25px;
+}
+.btn-tamam { background: #ff4444; }
+.btn-iptal { background: #333; }
