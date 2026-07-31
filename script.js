@@ -302,4 +302,10 @@ function kopyala(id) {
     const textarea = document.getElementById(id);
     textarea.select();
     textarea.setSelectionRange(0, 99999);
-   
+    navigator.clipboard.writeText(textarea.value);
+
+    const btn = textarea.parentElement.querySelector(".copyBtn");
+    const original = btn.textContent;
+    btn.textContent = "✅ Kopyalandı!";
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
