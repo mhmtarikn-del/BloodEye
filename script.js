@@ -85,9 +85,9 @@ function haftalikGrafikCiz(gecmis) {
     for (let i = 6; i >= 0; i--) {
         const gun = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
         const gunAdi = gun.getDate().toString().padStart(2,"0");
-const ayAdi = gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase();
-const yil = gun.getFullYear();
-gunler.push(`${gunAdi} ${ayAdi} ${yil}`);
+        const ayAdi = gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase();
+        const yil = gun.getFullYear();
+        gunler.push(`${gunAdi} ${ayAdi} ${yil}`);
     }
 
     const veri = [0,0,0,0,0,0,0];
@@ -113,7 +113,6 @@ gunler.push(`${gunAdi} ${ayAdi} ${yil}`);
     const barWidth = canvas.width / 18;
     const gap = barWidth * 0.4;
 
-    // Tooltip div'i
     let tooltipDiv = document.getElementById("chartTooltip");
     if (!tooltipDiv) {
         tooltipDiv = document.createElement("div");
