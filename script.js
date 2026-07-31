@@ -1,3 +1,10 @@
+// Sekme yönetimi
+function sekmeGoster(sekme) {
+    document.querySelectorAll(".sekme").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+    document.getElementById("sekme-" + sekme).classList.add("active");
+    event.target.classList.add("active");
+}
 // v16 - VT detay paneli
 document.getElementById("sorguBtn").addEventListener("click", sorgula);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
