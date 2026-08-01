@@ -9,12 +9,22 @@ function sayfaGoster(sayfa) {
     document.getElementById("sayfa-" + sayfa).classList.add("active");
     event.target.classList.add("active");
         if (sayfa === "dashboard") dashboardGuncelle();
-    if (sayfa === "tehdit") tehditAnaliziGuncelle();
+            if (sayfa === "tehdit") {
+        setTimeout(() => {
+            tehditAnaliziGuncelle();
+            if (haritaObj) setTimeout(() => haritaObj.invalidateSize(), 500);
+        }, 300);
+    }
 }
 
 // localStorage
 function gecmisiGetir() {
-    return JSON.parse(localStorage.getItem("bloodeye_gecmis") || "[]");
+    const ham = JSON.parse(localStorage.getItem("bloodeye_gecmis") || "[]");
+    const temiz = ham.filter(k => k.seviye && k.tarih);
+    if (temiz.length !== ham.length) {
+        localStorage.setItem("bloodeye_gecmis", JSON.stringify(temiz));
+    }
+    return temiz;
 }
 function gecmiseEkle(kayit) {
     const gecmis = gecmisiGetir();
@@ -450,7 +460,7 @@ gecmisiGoster();
 // Tehdit Analizi
 let haritaObj = null;
 
-function tehditAnaliziGuncelle() {
+async function tehditAnaliziGuncelle() {
     const gecmis = gecmisiGetir();
     const simdi = Date.now();
     const son7Gun = simdi - 7 * 24 * 60 * 60 * 1000;
@@ -473,11 +483,31 @@ function tehditAnaliziGuncelle() {
         if (!ulkeSayac[k.ip]) ulkeSayac[k.ip] = 0;
         ulkeSayac[k.ip]++;
     });
-    const ulkeSirali = Object.entries(ulkeSayac).sort((a,b) => b[1] - a[1]).slice(0, 5);
+        // Ülke listesi - konumlu
+    const ulkeListe = [];
+    const islenenIPler = new Set();
+    
+    for (const k of son7Kayit.filter(k => k.seviye === "kritik")) {
+        if (islenenIPler.has(k.ip)) continue;
+        islenenIPler.add(k.ip);
+        
+        try {
+            const res = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${k.ip}`).then(r => r.json());
+            const ulke = res.country || "??";
+            const ulkeKodu = res.country || "UN";
+            const bayrak = ulkeKoduEmoji(ulkeKodu);
+            const adet = son7Kayit.filter(x => x.ip === k.ip && x.seviye === "kritik").length;
+            ulkeListe.push({ ip: k.ip, ulke, bayrak, adet });
+        } catch(e) {
+            ulkeListe.push({ ip: k.ip, ulke: "??", bayrak: "🏳️", adet: 1 });
+        }
+    }
+    
+    const ulkeSirali = ulkeListe.sort((a,b) => b.adet - a.adet).slice(0, 5);
     let ulkeHtml = "";
     if (ulkeSirali.length === 0) ulkeHtml = '<p class="bos">Veri yok</p>';
-    else ulkeSirali.forEach(([ip, adet]) => {
-        ulkeHtml += `<div class="ulke-item"><span>${ip}</span><span>${adet}x</span></div>`;
+    else ulkeSirali.forEach(u => {
+        ulkeHtml += `<div class="ulke-item"><span>${u.bayrak} ${u.ip}</span><span>${u.adet}x</span></div>`;
     });
     document.getElementById("ulkeListesi").innerHTML = ulkeHtml;
 
@@ -494,7 +524,7 @@ function tehditAnaliziGuncelle() {
     `;
 
     // Harita (Leaflet)
-        setTimeout(() => haritaGuncelle(son7Kayit.filter(k => k.seviye === "kritik")), 500);
+    setTimeout(() => haritaGuncelle(son7Kayit.filter(k => k.seviye === "kritik")), 500);
 }
 
 function pastaCiz(temiz, supheli, kritik, toplam) {
@@ -548,8 +578,8 @@ async function haritaGuncelle(kritikIPler) {
 
     if (!haritaObj) {
         haritaObj = L.map("harita").setView([30, 0], 2);
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-            attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+                L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
         }).addTo(haritaObj);
     }
 
@@ -584,5 +614,11 @@ async function haritaGuncelle(kritikIPler) {
     haritaObj.eachLayer(layer => {
         if (layer instanceof L.CircleMarker) bounds.push(layer.getLatLng());
     });
-    if (bounds.length > 0) haritaObj.fitBounds(bounds, { padding: [30, 30] });
+   // if (bounds.length > 0) haritaObj.fitBounds(bounds, { padding: [30, 30] });
+}
+function ulkeKoduEmoji(kod) {
+    if (!kod || kod.length !== 2) return "🏳️";
+    const birinci = kod.charCodeAt(0) + 127397;
+    const ikinci = kod.charCodeAt(1) + 127397;
+    return String.fromCodePoint(birinci, ikinci);
 }
