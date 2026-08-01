@@ -8,7 +8,8 @@ function sayfaGoster(sayfa) {
     document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
     document.getElementById("sayfa-" + sayfa).classList.add("active");
     event.target.classList.add("active");
-    if (sayfa === "dashboard") dashboardGuncelle();
+        if (sayfa === "dashboard") dashboardGuncelle();
+    if (sayfa === "tehdit") tehditAnaliziGuncelle();
 }
 
 // localStorage
@@ -493,7 +494,7 @@ function tehditAnaliziGuncelle() {
     `;
 
     // Harita (Leaflet)
-    setTimeout(() => haritaGuncelle(son7Kayit.filter(k => k.seviye === "kritik")), 300);
+        setTimeout(() => haritaGuncelle(son7Kayit.filter(k => k.seviye === "kritik")), 500);
 }
 
 function pastaCiz(temiz, supheli, kritik, toplam) {
@@ -541,7 +542,7 @@ function pastaCiz(temiz, supheli, kritik, toplam) {
     document.getElementById("pastaLegend").innerHTML = legendHtml;
 }
 
-function haritaGuncelle(kritikIPler) {
+async function haritaGuncelle(kritikIPler) {
     const haritaDiv = document.getElementById("harita");
     if (!haritaDiv) return;
 
@@ -552,20 +553,36 @@ function haritaGuncelle(kritikIPler) {
         }).addTo(haritaObj);
     }
 
-    // Eski marker'ları temizle
     haritaObj.eachLayer(layer => {
         if (layer instanceof L.CircleMarker) haritaObj.removeLayer(layer);
     });
 
-    // Her kritik IP için marker (konum bilgisi lazım, şimdilik rastgele dağıtalım veya IP'den tahmin)
-    // Gerçek konum için ipinfo verisi lazım, şimdilik bilinmiyorsa atlama
-    kritikIPler.forEach(k => {
-        // localStorage'da konum yok, o yüzden harita boş kalabilir
-        // İleri aşamada IP bazlı konum ekleriz
-    });
+    // Benzersiz kritik IP'ler
+    const benzersiz = [...new Set(kritikIPler.map(k => k.ip))];
 
-    // Şimdilik örnek noktalar (test için)
-    if (kritikIPler.length === 0) {
-        // Boş, haritayı sıfırla
+    for (const ip of benzersiz) {
+        try {
+            const res = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`).then(r => r.json());
+            if (res && res.loc) {
+                const [lat, lon] = res.loc.split(",").map(Number);
+                const adet = kritikIPler.filter(k => k.ip === ip).length;
+                const radius = Math.min(adet * 8 + 10, 40);
+
+                L.circleMarker([lat, lon], {
+                    radius: radius,
+                    color: "#ff4444",
+                    weight: 2,
+                    fillColor: "#ff4444",
+                    fillOpacity: 0.4
+                }).addTo(haritaObj).bindPopup(`<b>${ip}</b><br>${res.city || ""}, ${res.country || ""}<br>Kritik: ${adet}x`);
+            }
+        } catch(e) {}
     }
+
+    // Marker varsa haritayı onlara göre ayarla
+    const bounds = [];
+    haritaObj.eachLayer(layer => {
+        if (layer instanceof L.CircleMarker) bounds.push(layer.getLatLng());
+    });
+    if (bounds.length > 0) haritaObj.fitBounds(bounds, { padding: [30, 30] });
 }
