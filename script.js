@@ -106,17 +106,19 @@ function haftalikGrafikCiz(gecmis) {
     const max = Math.max(...veri, 1);
     const canvas = document.getElementById("chartHaftalik");
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = (rect.width - 20) * dpr;
-    canvas.height = 200 * dpr;
-    canvas.style.width = (rect.width - 20) + "px";
-    canvas.style.height = "200px";
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const barWidth = canvas.width / 30;
+    const dpr = window.devicePixelRatio || 1;
+    const genislik = canvas.parentElement.clientWidth - 30;
+    canvas.width = genislik * dpr;
+    canvas.height = 200 * dpr;
+    canvas.style.width = genislik + "px";
+    canvas.style.height = "200px";
+
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, genislik, 200);
+
+    const barWidth = Math.max(8, genislik / 35);
     const gap = barWidth * 0.3;
 
     let tooltipDiv = document.getElementById("chartTooltip");
