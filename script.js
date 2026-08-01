@@ -10,6 +10,7 @@ function sayfaGoster(sayfa) {
     document.getElementById("sayfa-" + sayfa).classList.add("active");
     event.target.classList.add("active");
     if (sayfa === "dashboard") dashboardGuncelle();
+        if (sayfa === "hashdetector") setTimeout(() => hashGecmisiGoster(), 200);
     if (sayfa === "tehdit") {
         setTimeout(() => {
             tehditAnaliziGuncelle();
@@ -675,3 +676,4 @@ function hashTablosuOlustur(veriler) {
 }
 dashboardGuncelle();
 gecmisiGoster();
+hashGecmisiGoster();
