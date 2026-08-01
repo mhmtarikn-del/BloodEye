@@ -280,6 +280,7 @@ async function vtOtomatikBaslat(veriler) {
                 const mal = stats.malicious || 0;
                 const tot = Object.values(stats).reduce((a,b) => a+b, 0);
                 document.getElementById(`vt-${i}`).textContent = `${mal}/${tot}`;
+                    v.vtSonuc = `${mal}/${tot}`;
                 if (mal > 0) {
                     document.getElementById(`vt-${i}`).style.color = "#c62828";
                     document.getElementById(`vt-${i}`).style.fontWeight = "bold";
@@ -287,6 +288,7 @@ async function vtOtomatikBaslat(veriler) {
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ⚠️`;
                 } else {
                     document.getElementById(`vt-${i}`).style.color = "#40e0d0";
+                                    v.vtSonuc = `${mal}/${tot}`;
                     document.getElementById(sid).className = "vt-satir vt-temiz";
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ✅`;
                 }
@@ -298,6 +300,7 @@ async function vtOtomatikBaslat(veriler) {
         await new Promise(r => setTimeout(r, 15000));
     }
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
+    gecmisiGoster();
 }
 
 function vtDetayPanel() {
@@ -360,8 +363,8 @@ function gecmisiGoster() {
     const panel=document.getElementById("gecmisPanel"); if(!panel)return;
     if(sonKayitlar.length===0){panel.style.display="none";return;}
     panel.style.display="block";
-    let html="<table><tr><th>IP</th><th>Tarih</th><th>Durum</th><th>Abuse</th><th>ipinfo</th></tr>";
-    sonKayitlar.forEach(k=>{ const tarih=new Date(k.tarih).toLocaleString("tr-TR"), puan=Math.max(k.abusePuan||0,k.infoPuan||0); let durum=''; if(puan>=21)durum='<span style="color:#c62828;">🔴 Kritik</span>'; else if(puan>=15)durum='<span style="color:#ffaa00;">🟠 Şüpheli</span>'; else durum='<span style="color:#40e0d0;">🟢 Temiz</span>'; html+=`<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td></tr>`; });
+    let html="<table><tr><th>IP</th><th>Tarih</th><th>Durum</th><th>Abuse</th><th>ipinfo</th><th>VT</th></tr>";
+    sonKayitlar.forEach(k=>{ const tarih=new Date(k.tarih).toLocaleString("tr-TR"), puan=Math.max(k.abusePuan||0,k.infoPuan||0); let durum=''; if(puan>=21)durum='<span style="color:#c62828;">🔴 Kritik</span>'; else if(puan>=15)durum='<span style="color:#ffaa00;">🟠 Şüpheli</span>'; else durum='<span style="color:#40e0d0;">🟢 Temiz</span>'; html+=`<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td><td>-</td></tr>`; });
     html+="</table>"; document.getElementById("gecmisTablo").innerHTML=html;
 }
 
