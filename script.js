@@ -55,12 +55,8 @@ function dashboardGuncelle() {
     const son24Kayit = gecmis.filter(k => k.tarih > son24s);
     const son24Tehlikeli = son24Kayit.filter(k => k.seviye === "kritik" || k.seviye === "supheli").length;
     const oran = son24Kayit.length > 0 ? Math.round((son24Tehlikeli / son24Kayit.length) * 100) : 0;
-    const gauge = document.getElementById("gaugeCircle");
-    document.getElementById("gaugeText").textContent = "%" + oran;
-    document.getElementById("gaugeDetay").textContent = `${son24Tehlikeli}/${son24Kayit.length} IP`;
-    if (oran >= 70) gauge.style.borderColor = "#ff4444";
-    else if (oran >= 40) gauge.style.borderColor = "#ffaa00";
-    else gauge.style.borderColor = "#40e0d0";
+        document.getElementById("gaugeDetay").textContent = `${son24Tehlikeli}/${son24Kayit.length} IP`;
+    gaugeCiz(oran);
 
     // Kritik IP listesi
     const kritikIPs = [...new Set(gecmis.filter(k => k.seviye === "kritik").map(k => k.ip))];
@@ -123,8 +119,8 @@ function haftalikGrafikCiz(gecmis) {
     canvas.height = 200;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const barWidth = canvas.width / 18;
-    const gap = barWidth * 0.4;
+    const barWidth = canvas.width / 30;
+    const gap = barWidth * 0.3;
 
     let tooltipDiv = document.getElementById("chartTooltip");
     if (!tooltipDiv) {
@@ -141,10 +137,10 @@ function haftalikGrafikCiz(gecmis) {
         let found = false;
 
         for (let i = 0; i < 7; i++) {
-            const x = i * (barWidth * 2 + gap) + 30;
-            if (mx >= x && mx <= x + barWidth * 2) {
+            const x = i * (barWidth * 3 + gap) + 30;
+            if (mx >= x && mx <= x + barWidth * 3) {
                 tooltipDiv.style.display = "block";
-                tooltipDiv.style.left = (rect.left + x + barWidth) + "px";
+                tooltipDiv.style.left = (rect.left + x + barWidth * 1.5) + "px";
                 tooltipDiv.style.top = (rect.top + my - 60) + "px";
                 tooltipDiv.innerHTML = `<b>${gunler[i]}</b><br><span style="color:#40e0d0;">● Temiz: ${veri[i] - supheliVeri[i] - kritikVeri[i]}</span><br><span style="color:#ffaa00;">● Şüpheli: ${supheliVeri[i]}</span><br><span style="color:#ff4444;">● Kritik: ${kritikVeri[i]}</span>`;
                 found = true;
@@ -156,7 +152,7 @@ function haftalikGrafikCiz(gecmis) {
     canvas.onmouseleave = function() { tooltipDiv.style.display = "none"; };
 
     for (let i = 0; i < 7; i++) {
-        const x = i * (barWidth * 2 + gap) + 30;
+        const x = i * (barWidth * 3 + gap) + 30;
         const temizH = ((veri[i] - supheliVeri[i] - kritikVeri[i]) / max) * 140;
         const supheliH = (supheliVeri[i] / max) * 140;
         const kritikH = (kritikVeri[i] / max) * 140;
@@ -164,14 +160,14 @@ function haftalikGrafikCiz(gecmis) {
         ctx.fillStyle = "#40e0d0";
         ctx.fillRect(x, 150 - temizH, barWidth, temizH);
         ctx.fillStyle = "#ffaa00";
-        ctx.fillRect(x, 150 - temizH - supheliH, barWidth, supheliH);
-        ctx.fillStyle = "#ff4444";
-        ctx.fillRect(x, 150 - temizH - supheliH - kritikH, barWidth, kritikH);
+        ctx.fillRect(x + barWidth + 2, 150 - supheliH, barWidth, supheliH);
+        ctx.fillStyle = "#c62828";
+        ctx.fillRect(x + (barWidth + 2) * 2, 150 - kritikH, barWidth, kritikH);
 
         ctx.fillStyle = "#aaa";
         ctx.font = "10px Segoe UI";
         ctx.textAlign = "center";
-        ctx.fillText(gunler[i], x + barWidth, 170);
+        ctx.fillText(gunler[i], x + barWidth * 1.5, 170);
     }
 }
 
@@ -621,4 +617,50 @@ function ulkeKoduEmoji(kod) {
     const birinci = kod.charCodeAt(0) + 127397;
     const ikinci = kod.charCodeAt(1) + 127397;
     return String.fromCodePoint(birinci, ikinci);
+}
+function gaugeCiz(oran) {
+    const canvas = document.getElementById("gaugeCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width, h = canvas.height;
+    const cx = w/2, cy = h - 20;
+    const r = 80;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Arka plan yarım halka
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI, 0);
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.lineWidth = 16;
+    ctx.stroke();
+
+    // Renk seçimi
+    let renk = "#40e0d0";
+    if (oran >= 70) renk = "#c62828";
+    else if (oran >= 40) renk = "#ffaa00";
+
+    // Dolu kısım
+    const aci = Math.PI + (Math.PI * oran / 100);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI, aci);
+    ctx.strokeStyle = renk;
+    ctx.lineWidth = 14;
+    ctx.lineCap = "round";
+    ctx.stroke();
+    ctx.lineCap = "butt";
+
+    // Yüzde yazısı
+    ctx.fillStyle = renk;
+    ctx.font = "bold 22px 'Segoe UI'";
+    ctx.textAlign = "center";
+    ctx.fillText("%" + oran, cx, cy - 50);
+
+    // Uç nokta
+    const ex = cx + r * Math.cos(aci);
+    const ey = cy + r * Math.sin(aci);
+    ctx.beginPath();
+    ctx.arc(ex, ey, 5, 0, Math.PI*2);
+    ctx.fillStyle = renk;
+    ctx.fill();
 }

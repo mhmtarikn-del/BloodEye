@@ -153,12 +153,15 @@ body {
 
 /* Risk Gauge */
 .risk-gauge { text-align:center; }
+.risk-gauge canvas {
+    margin-bottom: 5px;
+}
 .gauge-circle {
     width: 120px;
     height: 120px;
     border-radius: 50%;
     border: 6px solid #0f3460;
-    margin: 0 auto 10px;
+    margin-bottom:5px;
     display: flex;
     align-items: center;
     justify-content: center;
