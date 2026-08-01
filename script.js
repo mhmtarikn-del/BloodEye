@@ -218,6 +218,7 @@ async function sorgula() {
 
     tabloOlustur(sonuclar);
     btn.disabled = false;
+        gecmisiGoster();
     btn.textContent = "Sorgula";
     exportBtn.style.display = "block";
     if (vtDetayBtn) vtDetayBtn.style.display = "block";
@@ -405,6 +406,30 @@ function sifirlaPopup() {
 
 function sifirlaOnay() {
     localStorage.removeItem("bloodeye_gecmis");
-    document.querySelectorAll(".popup-overlay").forEach(p => p.remove());
-    dashboardGuncelle();
+    location.reload();
 }
+function gecmisiGoster() {
+    const gecmis = gecmisiGetir();
+    const son24s = Date.now() - 24 * 60 * 60 * 1000;
+    const sonKayitlar = gecmis.filter(k => k.tarih > son24s).sort((a,b) => b.tarih - a.tarih);
+
+    const panel = document.getElementById("gecmisPanel");
+    if (sonKayitlar.length === 0) {
+        panel.style.display = "none";
+        return;
+    }
+
+    panel.style.display = "block";
+    let html = "<table><tr><th>IP</th><th>Tarih</th><th>Durum</th><th>Abuse</th><th>ipinfo</th></tr>";
+
+    sonKayitlar.forEach(k => {
+        const tarih = new Date(k.tarih).toLocaleString("tr-TR");
+        const durum = k.supheli ? '<span style="color:#ff4444;">⚠️ Şüpheli</span>' : '<span style="color:#40e0d0;">✅ Temiz</span>';
+        html += `<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan || 0}</td><td>%${k.infoPuan || 0}</td></tr>`;
+    });
+
+    html += "</table>";
+    document.getElementById("gecmisTablo").innerHTML = html;
+}
+dashboardGuncelle();
+gecmisiGoster();
