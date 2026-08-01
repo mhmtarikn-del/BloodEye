@@ -1,4 +1,5 @@
 // v0.22 - 3 seviye: temiz/supheli/kritik
+let vtIptal = false;
 let sonVeriler = [];
 let vtHamVeriler = [];
 
@@ -188,6 +189,7 @@ async function sorgula() {
         return;
     }
 
+    vtIptal = true;
     btn.disabled = true;
     btn.textContent = "Sorgulanıyor...";
     exportBtn.style.display = "none";
@@ -270,7 +272,8 @@ async function vtOtomatikBaslat(veriler) {
     panel.style.display = "block";
     sonucDiv.innerHTML = "";
 
-    for (let i = 0; i < veriler.length; i++) {
+        for (let i = 0; i < veriler.length; i++) {
+        if (vtIptal) break;
         const v = veriler[i];
         durum.textContent = `Taranıyor: ${i+1}/${veriler.length}`;
         const sid = `vtsatir-${i}`;
