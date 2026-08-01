@@ -28,6 +28,7 @@ function gecmisiGetir() {
 function gecmiseEkle(kayit) {
     const gecmis = gecmisiGetir();
     const puan = Math.max(kayit.abusePuan || 0, kayit.infoPuan || 0);
+        kayit.vtSonuc = kayit.vtSonuc || "-";
     if (puan >= 21) kayit.seviye = "kritik";
     else if (puan >= 15) kayit.seviye = "supheli";
     else kayit.seviye = "temiz";
@@ -274,13 +275,11 @@ async function vtOtomatikBaslat(veriler) {
         try {
             const res = await fetch(`https://bloodeye-proxy.onrender.com/vt?ip=${v.ip}`).then(r => r.json());
             vtHamVeriler[i] = res;
-                        console.log("VT cevap:", v.ip, res);
             if (res.data) {
                 const stats = res.data.attributes.last_analysis_stats;
                 const mal = stats.malicious || 0;
                 const tot = Object.values(stats).reduce((a,b) => a+b, 0);
                 document.getElementById(`vt-${i}`).textContent = `${mal}/${tot}`;
-                    v.vtSonuc = `${mal}/${tot}`;
                 if (mal > 0) {
                     document.getElementById(`vt-${i}`).style.color = "#c62828";
                     document.getElementById(`vt-${i}`).style.fontWeight = "bold";
@@ -288,7 +287,6 @@ async function vtOtomatikBaslat(veriler) {
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ⚠️`;
                 } else {
                     document.getElementById(`vt-${i}`).style.color = "#40e0d0";
-                                    v.vtSonuc = `${mal}/${tot}`;
                     document.getElementById(sid).className = "vt-satir vt-temiz";
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ✅`;
                 }
@@ -364,7 +362,7 @@ function gecmisiGoster() {
     if(sonKayitlar.length===0){panel.style.display="none";return;}
     panel.style.display="block";
     let html="<table><tr><th>IP</th><th>Tarih</th><th>Durum</th><th>Abuse</th><th>ipinfo</th><th>VT</th></tr>";
-    sonKayitlar.forEach(k=>{ const tarih=new Date(k.tarih).toLocaleString("tr-TR"), puan=Math.max(k.abusePuan||0,k.infoPuan||0); let durum=''; if(puan>=21)durum='<span style="color:#c62828;">🔴 Kritik</span>'; else if(puan>=15)durum='<span style="color:#ffaa00;">🟠 Şüpheli</span>'; else durum='<span style="color:#40e0d0;">🟢 Temiz</span>'; html+=`<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td><td>-</td></tr>`; });
+    sonKayitlar.forEach(k=>{ const tarih=new Date(k.tarih).toLocaleString("tr-TR"), puan=Math.max(k.abusePuan||0,k.infoPuan||0); let durum=''; if(puan>=21)durum='<span style="color:#c62828;">🔴 Kritik</span>'; else if(puan>=15)durum='<span style="color:#ffaa00;">🟠 Şüpheli</span>'; else durum='<span style="color:#40e0d0;">🟢 Temiz</span>'; html+=`<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td><td>${k.vtSonuc||"-"}</td></tr>`; });
     html+="</table>"; document.getElementById("gecmisTablo").innerHTML=html;
 }
 
