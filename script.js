@@ -232,6 +232,7 @@ function tabloOlustur(veriler) {
     veriler.forEach((v, index) => {
         const ip = infoSusPuan(v);
         const ap = abuseSusPuan(v);
+                const hataVar = (ip === 0 && ap === 0);
         const is = ip >= 70 ? "sus-yuksek" : ip >= 40 ? "sus-orta" : "sus-dusuk";
         const as = ap >= 70 ? "sus-yuksek" : ap >= 40 ? "sus-orta" : "sus-dusuk";
 
@@ -242,7 +243,10 @@ function tabloOlustur(veriler) {
         html += `<td class="${is}">%${ip}</td>`;
         html += `<td class="${as}">%${ap}</td>`;
         html += `<td id="vt-${index}" class="vt-bekliyor">...</td>`;
-        html += `<td><button class="detayBtn" onclick="detayGoster(${index})">Detay</button></td>`;
+        html += `<td style="white-space:nowrap;">`;
+html += `<button class="detayBtn" onclick="detayGoster(${index})">Detay</button> `;
+
+html += `<button class="detayBtn tekrarDene" id="td-${index}" style="display:${hataVar ? 'inline-block' : 'none'}; background:#ffaa00;" onclick="tekrarDene(${index})">T.Dene</button>`;
         html += "</tr>";
     });
 
@@ -291,9 +295,11 @@ async function vtOtomatikBaslat(veriler) {
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ✅`;
                 }
             }
-        } catch(e) {
+                } catch(e) {
             document.getElementById(`vt-${i}`).textContent = "Hata";
-            document.getElementById(sid).textContent = `${v.ip} → Hata`;
+            document.getElementById(satirId).textContent = `${v.ip} → Hata`;
+            const tdBtn = document.getElementById(`td-${i}`);
+            if (tdBtn) tdBtn.style.display = "inline-block";
         }
         await new Promise(r => setTimeout(r, 15000));
     }
@@ -433,3 +439,41 @@ function gecmisiGoster() {
 }
 dashboardGuncelle();
 gecmisiGoster();
+async function tekrarDene(index) {
+    const v = sonVeriler[index];
+    const ip = v.ip;
+    const tdBtn = document.getElementById(`td-${index}`);
+    
+    if (tdBtn) { tdBtn.disabled = true; tdBtn.textContent = "..."; }
+    document.getElementById(`vt-${index}`).textContent = "...";
+    document.getElementById(`vt-${index}`).style.color = "#ffaa00";
+
+    // ipinfo tekrar
+    try {
+        v.ipInfo = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`).then(r => r.json());
+    } catch(e) {}
+
+    // abuse tekrar
+    try {
+        v.abuse = await fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}`).then(r => r.json());
+    } catch(e) {}
+
+    // VT tekrar
+    try {
+        const res = await fetch(`https://bloodeye-proxy.onrender.com/vt?ip=${ip}`).then(r => r.json());
+        vtHamVeriler[index] = res;
+        if (res.data) {
+            const stats = res.data.attributes.last_analysis_stats;
+            const mal = stats.malicious || 0;
+            const tot = Object.values(stats).reduce((a,b) => a+b, 0);
+            document.getElementById(`vt-${index}`).textContent = `${mal}/${tot}`;
+            document.getElementById(`vt-${index}`).style.color = mal > 0 ? "#ff4444" : "#40e0d0";
+        }
+    } catch(e) {
+        document.getElementById(`vt-${index}`).textContent = "Hata";
+    }
+
+    // Tabloda puanları güncelle (basit yaklaşım: tabloyu yeniden oluştur)
+    tabloOlustur(sonVeriler);
+    gecmisiGoster();
+}
