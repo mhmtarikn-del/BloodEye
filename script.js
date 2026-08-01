@@ -1,4 +1,4 @@
-// v0.17 - Dashboard + localStorage + tooltip + turkuaz
+// v0.22 - 3 seviye: temiz/supheli/kritik
 let sonVeriler = [];
 let vtHamVeriler = [];
 
@@ -32,7 +32,7 @@ function dashboardGuncelle() {
     const simdi = Date.now();
     const son24s = simdi - 24 * 60 * 60 * 1000;
 
-        document.getElementById("istToplam").textContent = gecmis.length;
+    document.getElementById("istToplam").textContent = gecmis.length;
     const temizSayi = gecmis.filter(k => k.seviye === "temiz").length;
     const supheliSayi = gecmis.filter(k => k.seviye === "supheli").length;
     const kritikSayi = gecmis.filter(k => k.seviye === "kritik").length;
@@ -40,7 +40,7 @@ function dashboardGuncelle() {
     document.getElementById("istSupheli").textContent = supheliSayi + kritikSayi;
 
     // Saldırı seviyesi
-        const son24Kayit = gecmis.filter(k => k.tarih > son24s);
+    const son24Kayit = gecmis.filter(k => k.tarih > son24s);
     const son24Tehlikeli = son24Kayit.filter(k => k.seviye === "kritik" || k.seviye === "supheli").length;
     const oran = son24Kayit.length > 0 ? Math.round((son24Tehlikeli / son24Kayit.length) * 100) : 0;
     const gauge = document.getElementById("gaugeCircle");
@@ -50,37 +50,6 @@ function dashboardGuncelle() {
     else if (oran >= 40) gauge.style.borderColor = "#ffaa00";
     else gauge.style.borderColor = "#40e0d0";
 
-    // Kritik IP + 7 günlük liste
-    const son7Gun = simdi - 7 * 24 * 60 * 60 * 1000;
-    const son7Kayit = gecmis.filter(k => k.tarih > son7Gun);
-
-    // Güne göre grupla
-    const gunGruplari = {};
-    son7Kayit.forEach(k => {
-        const gun = new Date(k.tarih).toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
-        if (!gunGruplari[gun]) gunGruplari[gun] = [];
-        gunGruplari[gun].push(k);
-    });
-
-    let kritikHtml = "";
-    const gunSirasi = Object.keys(gunGruplari).sort((a,b) => {
-        return new Date(b.split(" ").slice(-2).join(" ")) - new Date(a.split(" ").slice(-2).join(" "));
-    });
-
-    if (gunSirasi.length === 0) {
-        kritikHtml = '<p class="bos">Henüz veri yok</p>';
-    } else {
-        gunSirasi.forEach(gun => {
-            const kayitlar = gunGruplari[gun];
-            kritikHtml += `<div class="kritik-gun">📅 ${gun} (${kayitlar.length} IP)</div>`;
-            kayitlar.forEach(k => {
-                const cls = k.supheli ? "supheli" : "temiz";
-                const icon = k.supheli ? "🔴" : "🟢";
-                kritikHtml += `<div class="kritik-item ${cls}"><span>${icon} ${k.ip}</span><span>%${k.supheli ? k.abusePuan || k.infoPuan : 0}</span></div>`;
-            });
-        });
-    }
-    document.getElementById("kritikList").innerHTML = kritikHtml;
     // Kritik IP listesi
     const kritikIPs = [...new Set(gecmis.filter(k => k.seviye === "kritik").map(k => k.ip))];
     let kritikHtml = "";
@@ -106,6 +75,7 @@ function dashboardGuncelle() {
         });
     }
     document.getElementById("supheliList").innerHTML = supheliHtml;
+
     haftalikGrafikCiz(gecmis);
 }
 
@@ -119,7 +89,7 @@ function haftalikGrafikCiz(gecmis) {
         gunler.push(`${gunAdi} ${ayAdi} ${yil}`);
     }
 
-        const veri = [0,0,0,0,0,0,0];
+    const veri = [0,0,0,0,0,0,0];
     const supheliVeri = [0,0,0,0,0,0,0];
     const kritikVeri = [0,0,0,0,0,0,0];
     const simdi = Date.now();
@@ -163,9 +133,9 @@ function haftalikGrafikCiz(gecmis) {
             if (mx >= x && mx <= x + barWidth * 2) {
                 tooltipDiv.style.display = "block";
                 tooltipDiv.style.left = (rect.left + x + barWidth) + "px";
-                tooltipDiv.style.top = (rect.top + my - 50) + "px";
-                                tooltipDiv.innerHTML = `<b>${gunler[i]}</b><br><span style="color:#40e0d0;">● Temiz: ${veri[i] - supheliVeri[i] - kritikVeri[i]}</span><br><span style="color:#ffaa00;">● Şüpheli: ${supheliVeri[i]}</span><br><span style="color:#ff4444;">● Kritik: ${kritikVeri[i]}</span>`;
-                                found = true;
+                tooltipDiv.style.top = (rect.top + my - 60) + "px";
+                tooltipDiv.innerHTML = `<b>${gunler[i]}</b><br><span style="color:#40e0d0;">● Temiz: ${veri[i] - supheliVeri[i] - kritikVeri[i]}</span><br><span style="color:#ffaa00;">● Şüpheli: ${supheliVeri[i]}</span><br><span style="color:#ff4444;">● Kritik: ${kritikVeri[i]}</span>`;
+                found = true;
                 break;
             }
         }
@@ -175,7 +145,7 @@ function haftalikGrafikCiz(gecmis) {
 
     for (let i = 0; i < 7; i++) {
         const x = i * (barWidth * 2 + gap) + 30;
-               const temizH = ((veri[i] - supheliVeri[i] - kritikVeri[i]) / max) * 140;
+        const temizH = ((veri[i] - supheliVeri[i] - kritikVeri[i]) / max) * 140;
         const supheliH = (supheliVeri[i] / max) * 140;
         const kritikH = (kritikVeri[i] / max) * 140;
 
@@ -244,7 +214,7 @@ async function sorgula() {
     sonVeriler = sonuclar;
     vtHamVeriler = new Array(sonuclar.length).fill(null);
 
-        sonuclar.forEach(v => {
+    sonuclar.forEach(v => {
         const ap = abuseSusPuan(v);
         const ip = infoSusPuan(v);
         gecmiseEkle({ ip: v.ip, tarih: Date.now(), abusePuan: ap, infoPuan: ip });
@@ -252,11 +222,11 @@ async function sorgula() {
 
     tabloOlustur(sonuclar);
     btn.disabled = false;
-        gecmisiGoster();
     btn.textContent = "Sorgula";
     exportBtn.style.display = "block";
     if (vtDetayBtn) vtDetayBtn.style.display = "block";
     vtOtomatikBaslat(sonuclar);
+    gecmisiGoster();
 }
 
 function tabloOlustur(veriler) {
@@ -266,7 +236,6 @@ function tabloOlustur(veriler) {
     veriler.forEach((v, index) => {
         const ip = infoSusPuan(v);
         const ap = abuseSusPuan(v);
-                const hataVar = (ip === 0 && ap === 0);
         const is = ip >= 70 ? "sus-yuksek" : ip >= 40 ? "sus-orta" : "sus-dusuk";
         const as = ap >= 70 ? "sus-yuksek" : ap >= 40 ? "sus-orta" : "sus-dusuk";
 
@@ -278,6 +247,7 @@ function tabloOlustur(veriler) {
         html += `<td class="${as}">%${ap}</td>`;
         html += `<td id="vt-${index}" class="vt-bekliyor">...</td>`;
         html += `<td><button class="detayBtn" onclick="detayGoster(${index})">Detay</button></td>`;
+        html += "</tr>";
     });
 
     html += "</table>";
@@ -325,11 +295,9 @@ async function vtOtomatikBaslat(veriler) {
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ✅`;
                 }
             }
-                } catch(e) {
+        } catch(e) {
             document.getElementById(`vt-${i}`).textContent = "Hata";
-            document.getElementById(satirId).textContent = `${v.ip} → Hata`;
-            const tdBtn = document.getElementById(`td-${i}`);
-            if (tdBtn) tdBtn.style.display = "inline-block";
+            document.getElementById(sid).textContent = `${v.ip} → Hata`;
         }
         await new Promise(r => setTimeout(r, 15000));
     }
@@ -427,12 +395,11 @@ function kopyala(id) {
     setTimeout(()=>{btn.textContent="📋";},1500);
 }
 
-dashboardGuncelle();
 function sifirlaPopup() {
     let h = `<div class="popup-overlay" onclick="this.remove()">`;
     h += `<div class="popup popup-reset" onclick="event.stopPropagation()">`;
     h += `<h2>⚠️ Tüm Verileri Sıfırla</h2>`;
-    h += `<p>Dashboard verileri ve tarama geçmişi kalıcı olarak silinecek. Bu işlem geri alınamaz.</p>`;
+    h += `<p>Dashboard verileri ve tarama geçmişi kalıcı olarak silinecek.</p>`;
     h += `<div class="btn-group">`;
     h += `<button class="btn-tamam" onclick="sifirlaOnay()">Tamam</button>`;
     h += `<button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button>`;
@@ -444,12 +411,14 @@ function sifirlaOnay() {
     localStorage.removeItem("bloodeye_gecmis");
     location.reload();
 }
+
 function gecmisiGoster() {
     const gecmis = gecmisiGetir();
     const son24s = Date.now() - 24 * 60 * 60 * 1000;
     const sonKayitlar = gecmis.filter(k => k.tarih > son24s).sort((a,b) => b.tarih - a.tarih);
 
     const panel = document.getElementById("gecmisPanel");
+    if (!panel) return;
     if (sonKayitlar.length === 0) {
         panel.style.display = "none";
         return;
@@ -460,16 +429,17 @@ function gecmisiGoster() {
 
     sonKayitlar.forEach(k => {
         const tarih = new Date(k.tarih).toLocaleString("tr-TR");
-                const puan = Math.max(k.abusePuan || 0, k.infoPuan || 0);
+        const puan = Math.max(k.abusePuan || 0, k.infoPuan || 0);
         let durum = '';
         if (puan >= 21) durum = '<span style="color:#ff4444;">🔴 Kritik</span>';
         else if (puan >= 15) durum = '<span style="color:#ffaa00;">🟠 Şüpheli</span>';
         else durum = '<span style="color:#40e0d0;">🟢 Temiz</span>';
-        html += `<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan || 0}</td><td>%${k.infoPuan || 0}</td></tr>`;
+        html += `<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td></tr>`;
     });
 
     html += "</table>";
     document.getElementById("gecmisTablo").innerHTML = html;
 }
+
 dashboardGuncelle();
 gecmisiGoster();
