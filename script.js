@@ -405,22 +405,43 @@ function gecmisiGoster() {
 function ulkeKoduEmoji(kod) { if(!kod||kod.length!==2)return"🏳️"; return String.fromCodePoint(kod.charCodeAt(0)+127397,kod.charCodeAt(1)+127397); }
 
 function gaugeCiz(oran) {
+    const canvas = document.getElementById("gaugeCanvas");
+    if (!canvas) return;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = 200 * dpr;
     canvas.height = 140 * dpr;
     canvas.style.width = "200px";
     canvas.style.height = "140px";
+    const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
-    const canvas=document.getElementById("gaugeCanvas"); if(!canvas)return;
-    const ctx=canvas.getContext("2d"), w=canvas.width, h=canvas.height, cx=w/2, cy=h-15, r=85;
-    ctx.clearRect(0,0,w,h);
-    ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,0); ctx.strokeStyle="#1a1a2e"; ctx.lineWidth=16; ctx.stroke();
-    let renk="#40e0d0"; if(oran>=70)renk="#c62828"; else if(oran>=40)renk="#ffaa00";
-    const aci=Math.PI+(Math.PI*oran/100);
-    ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,aci); ctx.strokeStyle=renk; ctx.lineWidth=14; ctx.lineCap="round"; ctx.stroke(); ctx.lineCap="butt";
-    ctx.fillStyle=renk; ctx.font="bold 22px 'Segoe UI'"; ctx.textAlign="center"; ctx.fillText("%"+oran,cx,cy-50);
-    const ex=cx+r*Math.cos(aci), ey=cy+r*Math.sin(aci);
-    ctx.beginPath(); ctx.arc(ex,ey,5,0,Math.PI*2); ctx.fillStyle=renk; ctx.fill();
+    const w = 200, h = 140, cx = w/2, cy = h - 15, r = 85;
+    ctx.clearRect(0, 0, w, h);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI, 0);
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.lineWidth = 16;
+    ctx.stroke();
+    let renk = "#40e0d0";
+    if (oran >= 70) renk = "#c62828";
+    else if (oran >= 40) renk = "#ffaa00";
+    const aci = Math.PI + (Math.PI * oran / 100);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI, aci);
+    ctx.strokeStyle = renk;
+    ctx.lineWidth = 14;
+    ctx.lineCap = "round";
+    ctx.stroke();
+    ctx.lineCap = "butt";
+    ctx.fillStyle = renk;
+    ctx.font = "bold 22px 'Segoe UI'";
+    ctx.textAlign = "center";
+    ctx.fillText("%" + oran, cx, cy - 50);
+    const ex = cx + r * Math.cos(aci);
+    const ey = cy + r * Math.sin(aci);
+    ctx.beginPath();
+    ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+    ctx.fillStyle = renk;
+    ctx.fill();
 }
 
 // Tehdit Analizi
