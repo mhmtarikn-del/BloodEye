@@ -28,7 +28,7 @@ function gecmisiGetir() {
 function gecmiseEkle(kayit) {
     const gecmis = gecmisiGetir();
     const puan = Math.max(kayit.abusePuan || 0, kayit.infoPuan || 0);
-        kayit.vtSonuc = kayit.vtSonuc || "-";
+    
     if (puan >= 21) kayit.seviye = "kritik";
     else if (puan >= 15) kayit.seviye = "supheli";
     else kayit.seviye = "temiz";
