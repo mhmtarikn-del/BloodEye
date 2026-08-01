@@ -434,3 +434,14 @@ tr:hover { background:#161b22; }
 @media (max-width:768px) {
     .tehdit-ust { grid-template-columns:1fr; }
 }
+.dosya-yukleme {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.dosya-yukleme button {
+    width: auto;
+    padding: 10px 20px;
+    font-size: 14px;
+}

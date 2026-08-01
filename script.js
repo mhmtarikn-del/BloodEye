@@ -496,7 +496,27 @@ let hashSonVeriler = [];
 let hashVtVeriler = [];
 
 document.getElementById("hashSorguBtn")?.addEventListener("click", hashSorgula);
-
+document.getElementById("dosyaInput")?.addEventListener("change", async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    document.getElementById("dosyaAdi").textContent = file.name;
+    document.getElementById("dosyaBtn").disabled = true;
+    document.getElementById("dosyaBtn").textContent = "Hash hesaplanıyor...";
+    
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2,"0")).join("");
+    
+    document.getElementById("hashInput").value = hashHex;
+    document.getElementById("dosyaBtn").disabled = false;
+    document.getElementById("dosyaBtn").textContent = "📁 Dosya Seç ve Hash Hesapla";
+    document.getElementById("dosyaAdi").textContent = file.name + " (SHA256 hesaplandı)";
+    
+    // Otomatik sorgula
+    hashSorgula();
+});
 async function hashSorgula() {
     const input = document.getElementById("hashInput").value.trim();
     const sonucDiv = document.getElementById("hashSonuc");

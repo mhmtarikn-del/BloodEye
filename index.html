@@ -30,7 +30,7 @@
            
             <button class="menu-btn disabled">⚙️ Ayarlar</button>
             <div class="menu-footer">
-                <div class="versiyon">v0.53</div>
+                <div class="versiyon">v0.54</div>
                 <div class="built-by">Builded by <span class="footer-name">M.Tarık</span></div>
             </div>
         </nav>
@@ -168,7 +168,11 @@
             <div id="sayfa-hashdetector" class="sayfa">
                 <div class="container">
                     <textarea id="hashInput" placeholder="Hash değerlerini alt alta girin...&#10;Örn:&#10;d41d8cd98f00b204e9800998ecf8427e&#10;da39a3ee5e6b4b0d3255bfef95601890afd80709"></textarea>
-
+                    <div class="dosya-yukleme">
+                        <input type="file" id="dosyaInput" style="display:none;" />
+                        <button id="dosyaBtn" onclick="document.getElementById('dosyaInput').click()">📁 Dosya Seç ve Hash Hesapla</button>
+                        <span id="dosyaAdi" style="font-size:12px;color:#aaa;"></span>
+                    </div>
                     <button id="hashSorguBtn">Hash Sorgula</button>
                     <div id="hashSonuc"></div>
                     <div id="vtHashPanel" style="display:none;">
