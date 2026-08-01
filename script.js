@@ -191,6 +191,17 @@ async function sorgula() {
     const ipListesi = input.match(ipRegex) || [];
     const benzersizIP = [...new Set(ipListesi)];
 
+    // Son 24 saatte sorgulanmış IP'leri filtrele
+    const gecmis = gecmisiGetir();
+    const son24s = Date.now() - 24 * 60 * 60 * 1000;
+    const son24IPler = new Set(gecmis.filter(k => k.tarih > son24s).map(k => k.ip));
+    const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
+
+    if (filtrelenmisIP.length === 0) {
+        sonucDiv.innerHTML = '<p class="hata">Tüm IP\'ler son 24 saat içinde sorgulanmış. Yeni sorguya gerek yok.</p>';
+        return;
+    }
+
     if (benzersizIP.length === 0) {
         sonucDiv.innerHTML = '<p class="hata">Geçerli IP adresi bulunamadı.</p>';
         return;
@@ -207,9 +218,9 @@ async function sorgula() {
 
     const sonuclar = [];
 
-    for (let i = 0; i < benzersizIP.length; i++) {
-        const ip = benzersizIP[i];
-        sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${benzersizIP.length} - ${ip}</p>`;
+    for (let i = 0; i < filtrelenmisIP.length; i++) {
+        const ip = filtrelenmisIP[i];
+        sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${filtrelenmisIP.length} - ${ip}</p>`;
 
         let ipInfoData = null;
         let abuseData = null;
@@ -569,12 +580,12 @@ function pastaCiz(temiz, supheli, kritik, toplam) {
 }
 
 async function haritaGuncelle(kritikIPler) {
-    const haritaDiv = document.getElementById("harita");
+     const haritaDiv = document.getElementById("harita");
     if (!haritaDiv) return;
 
     if (!haritaObj) {
         haritaObj = L.map("harita").setView([30, 0], 2);
-                L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
         }).addTo(haritaObj);
     }
@@ -583,34 +594,48 @@ async function haritaGuncelle(kritikIPler) {
         if (layer instanceof L.CircleMarker) haritaObj.removeLayer(layer);
     });
 
-    // Benzersiz kritik IP'ler
     const benzersiz = [...new Set(kritikIPler.map(k => k.ip))];
+    const konumCache = JSON.parse(localStorage.getItem("bloodeye_konum") || "{}");
+    const istekler = [];
 
     for (const ip of benzersiz) {
-        try {
-            const res = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`).then(r => r.json());
-            if (res && res.loc) {
-                const [lat, lon] = res.loc.split(",").map(Number);
-                const adet = kritikIPler.filter(k => k.ip === ip).length;
-                const radius = Math.min(adet * 8 + 10, 40);
-
-                L.circleMarker([lat, lon], {
-                    radius: radius,
-                    color: "#ff4444",
-                    weight: 2,
-                    fillColor: "#ff4444",
-                    fillOpacity: 0.4
-                }).addTo(haritaObj).bindPopup(`<b>${ip}</b><br>${res.city || ""}, ${res.country || ""}<br>Kritik: ${adet}x`);
-            }
-        } catch(e) {}
+        if (konumCache[ip]) {
+            // Önbellekten al
+            istekler.push(Promise.resolve({ ip, ...konumCache[ip] }));
+        } else {
+            // API'den al
+            istekler.push(
+                fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res && res.loc) {
+                            konumCache[ip] = { loc: res.loc, city: res.city, country: res.country };
+                            localStorage.setItem("bloodeye_konum", JSON.stringify(konumCache));
+                        }
+                        return { ip, loc: res?.loc, city: res?.city, country: res?.country };
+                    })
+                    .catch(() => ({ ip }))
+            );
+        }
     }
 
-    // Marker varsa haritayı onlara göre ayarla
-    const bounds = [];
-    haritaObj.eachLayer(layer => {
-        if (layer instanceof L.CircleMarker) bounds.push(layer.getLatLng());
+    const sonuclar = await Promise.all(istekler);
+
+    sonuclar.forEach(({ ip, loc, city, country }) => {
+        if (loc) {
+            const [lat, lon] = loc.split(",").map(Number);
+            const adet = kritikIPler.filter(k => k.ip === ip).length;
+            const radius = Math.min(adet * 8 + 10, 40);
+
+            L.circleMarker([lat, lon], {
+                radius: radius,
+                color: "#c62828",
+                weight: 2,
+                fillColor: "#c62828",
+                fillOpacity: 0.4
+            }).addTo(haritaObj).bindPopup(`<b>${ip}</b><br>${city || ""}, ${country || ""}<br>Kritik: ${adet}x`);
+        }
     });
-   // if (bounds.length > 0) haritaObj.fitBounds(bounds, { padding: [30, 30] });
 }
 function ulkeKoduEmoji(kod) {
     if (!kod || kod.length !== 2) return "🏳️";
