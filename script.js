@@ -303,10 +303,16 @@ async function vtOtomatikBaslat(veriler) {
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
         // VT sonuçlarını localStorage'a kaydet
     const gecmis = gecmisiGetir();
-    veriler.forEach(v => {
-        const kayit = gecmis.find(k => k.ip === v.ip && !k.vtSonuc);
-        if (kayit) kayit.vtSonuc = v.vtSonuc || "-";
-    });
+    for (let i = 0; i < veriler.length; i++) {
+        const v = veriler[i];
+        if (!v.vtSonuc) continue;
+        for (let j = gecmis.length - 1; j >= 0; j--) {
+            if (gecmis[j].ip === v.ip && !gecmis[j].vtSonuc) {
+                gecmis[j].vtSonuc = v.vtSonuc;
+                break;
+            }
+        }
+    }
     localStorage.setItem("bloodeye_gecmis", JSON.stringify(gecmis));
     gecmisiGoster();
 }
