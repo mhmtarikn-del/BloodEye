@@ -539,10 +539,50 @@ async function hashSorgula() {
 
     hashSonVeriler = sonuclar;
     hashTablosuOlustur(sonuclar);
+    hashGecmiseEkle(sonuclar);
+    hashGecmisiGoster();
     btn.disabled = false;
     btn.textContent = "Hash Sorgula";
 }
+function hashGecmisiGetir() {
+    return JSON.parse(localStorage.getItem("bloodeye_hash_gecmis") || "[]");
+}
 
+function hashGecmiseEkle(sonuclar) {
+    const gecmis = hashGecmisiGetir();
+    const simdi = Date.now();
+    sonuclar.forEach(v => {
+        gecmis.push({
+            hash: v.hash,
+            tarih: simdi,
+            malicious: v.data?.data?.attributes?.last_analysis_stats?.malicious || 0,
+            harmless: v.data?.data?.attributes?.last_analysis_stats?.harmless || 0,
+            name: v.data?.data?.attributes?.meaningful_name || "-"
+        });
+    });
+    const son24s = simdi - 24 * 60 * 60 * 1000;
+    const filtrelenmis = gecmis.filter(k => k.tarih > son24s);
+    localStorage.setItem("bloodeye_hash_gecmis", JSON.stringify(filtrelenmis));
+}
+
+function hashGecmisiGoster() {
+    const gecmis = hashGecmisiGetir();
+    const panel = document.getElementById("hashGecmisPanel");
+    if (!panel) return;
+    if (gecmis.length === 0) { panel.style.display = "none"; return; }
+    panel.style.display = "block";
+
+    const sirali = gecmis.sort((a,b) => b.tarih - a.tarih);
+    let html = "<table><tr><th>Hash</th><th>Tarih</th><th>Zararlı</th><th>Temiz</th><th>Ad</th></tr>";
+    sirali.forEach(k => {
+        const tarih = new Date(k.tarih).toLocaleString("tr-TR");
+        const kisa = k.hash.length > 20 ? k.hash.substring(0,8)+"..."+k.hash.substring(k.hash.length-8) : k.hash;
+        const renk = k.malicious > 0 ? 'color:#c62828;font-weight:bold;' : 'color:#40e0d0;';
+        html += `<tr><td style="font-family:monospace;font-size:11px;" title="${k.hash}">${kisa}</td><td>${tarih}</td><td style="${renk}">${k.malicious}</td><td style="color:#40e0d0;">${k.harmless}</td><td>${k.name}</td></tr>`;
+    });
+    html += "</table>";
+    document.getElementById("hashGecmisTablo").innerHTML = html;
+}
 function hashTablosuOlustur(veriler) {
     let html = "<table><tr><th>Hash</th><th>Tip</th><th>Zararlı</th><th>Temiz</th><th>Popüler Ad</th></tr>";
 
@@ -562,7 +602,8 @@ function hashTablosuOlustur(veriler) {
         }
 
         const malRengi = mal > 0 ? 'style="color:#c62828;font-weight:bold;"' : 'style="color:#40e0d0;"';
-        html += `<tr><td style="font-family:monospace;font-size:11px;">${v.hash}</td><td>${tip}</td><td ${malRengi}>${mal}</td><td style="color:#40e0d0;">${temiz}</td><td>${ad}</td></tr>`;
+                const kisaHash = v.hash.length > 20 ? v.hash.substring(0,8) + "..." + v.hash.substring(v.hash.length-8) : v.hash;
+        html += `<tr><td style="font-family:monospace;font-size:11px;" title="${v.hash}">${kisaHash}</td><td>${tip}</td><td ${malRengi}>${mal}</td><td style="color:#40e0d0;">${temiz}</td><td>${ad}</td></tr>`;
     });
 
     html += "</table>";
