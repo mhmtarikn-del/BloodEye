@@ -202,6 +202,39 @@ async function sorgula() {
         return;
     }
 
+    // Son 24 saatte sorgulanmış IP'leri filtrele
+    const gecmis = gecmisiGetir();
+    const son24s = Date.now() - 24 * 60 * 60 * 1000;
+    const son24IPler = new Set(gecmis.filter(k => k.tarih > son24s).map(k => k.ip));
+    const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
+
+    if (filtrelenmisIP.length === 0) {
+        sonucDiv.innerHTML = '<p class="hata">Tüm IP\'ler son 24 saat içinde sorgulanmış. Yeni sorguya gerek yok.</p>';
+        return;
+    }
+
+    // Son 24 saatte sorgulanmış IP'leri filtrele
+    const gecmis = gecmisiGetir();
+    const son24s = Date.now() - 24 * 60 * 60 * 1000;
+    const son24IPler = new Set(gecmis.filter(k => k.tarih > son24s).map(k => k.ip));
+    const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
+
+    if (filtrelenmisIP.length === 0) {
+        sonucDiv.innerHTML = '<p class="hata">Tüm IP\'ler son 24 saat içinde sorgulanmış. Yeni sorguya gerek yok.</p>';
+        return;
+    }
+
+    // Son 24 saatte sorgulanmış IP'leri filtrele
+    const gecmis = gecmisiGetir();
+    const son24s = Date.now() - 24 * 60 * 60 * 1000;
+    const son24IPler = new Set(gecmis.filter(k => k.tarih > son24s).map(k => k.ip));
+    const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
+
+    if (filtrelenmisIP.length === 0) {
+        sonucDiv.innerHTML = '<p class="hata">Tüm IP\'ler son 24 saat içinde sorgulanmış. Yeni sorguya gerek yok.</p>';
+        return;
+    }
+
     if (benzersizIP.length === 0) {
         sonucDiv.innerHTML = '<p class="hata">Geçerli IP adresi bulunamadı.</p>';
         return;
@@ -490,7 +523,8 @@ async function tehditAnaliziGuncelle() {
         if (!ulkeSayac[k.ip]) ulkeSayac[k.ip] = 0;
         ulkeSayac[k.ip]++;
     });
-        // Ülke listesi - konumlu
+        // Ülke listesi - cache'li
+    const konumCache = JSON.parse(localStorage.getItem("bloodeye_konum") || "{}");
     const ulkeListe = [];
     const islenenIPler = new Set();
     
@@ -498,16 +532,11 @@ async function tehditAnaliziGuncelle() {
         if (islenenIPler.has(k.ip)) continue;
         islenenIPler.add(k.ip);
         
-        try {
-            const res = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${k.ip}`).then(r => r.json());
-            const ulke = res.country || "??";
-            const ulkeKodu = res.country || "UN";
-            const bayrak = ulkeKoduEmoji(ulkeKodu);
-            const adet = son7Kayit.filter(x => x.ip === k.ip && x.seviye === "kritik").length;
-            ulkeListe.push({ ip: k.ip, ulke, bayrak, adet });
-        } catch(e) {
-            ulkeListe.push({ ip: k.ip, ulke: "??", bayrak: "🏳️", adet: 1 });
-        }
+        const cached = konumCache[k.ip];
+        const ulke = cached?.country || "??";
+        const bayrak = ulkeKoduEmoji(ulke);
+        const adet = son7Kayit.filter(x => x.ip === k.ip && x.seviye === "kritik").length;
+        ulkeListe.push({ ip: k.ip, ulke, bayrak, adet });
     }
     
     const ulkeSirali = ulkeListe.sort((a,b) => b.adet - a.adet).slice(0, 5);
