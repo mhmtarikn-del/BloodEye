@@ -446,3 +446,126 @@ function gecmisiGoster() {
 
 dashboardGuncelle();
 gecmisiGoster();
+// Tehdit Analizi
+let haritaObj = null;
+
+function tehditAnaliziGuncelle() {
+    const gecmis = gecmisiGetir();
+    const simdi = Date.now();
+    const son7Gun = simdi - 7 * 24 * 60 * 60 * 1000;
+    const son1Saat = simdi - 60 * 60 * 1000;
+    const son7Kayit = gecmis.filter(k => k.tarih > son7Gun);
+    const son1SaatKayit = gecmis.filter(k => k.tarih > son1Saat);
+
+    // Pasta grafik
+    const kritik = son7Kayit.filter(k => k.seviye === "kritik").length;
+    const supheli = son7Kayit.filter(k => k.seviye === "supheli").length;
+    const temiz = son7Kayit.filter(k => k.seviye === "temiz").length;
+    const toplam = son7Kayit.length || 1;
+    pastaCiz(temiz, supheli, kritik, toplam);
+
+    // Ülke listesi
+    const ulkeSayac = {};
+    son7Kayit.filter(k => k.seviye === "kritik").forEach(k => {
+        const ulke = k.ip ? "Bilinmiyor" : "Bilinmiyor";
+        // IP'den ülke bilgisi localStorage'da yok, şimdilik sayı gösterelim
+        if (!ulkeSayac[k.ip]) ulkeSayac[k.ip] = 0;
+        ulkeSayac[k.ip]++;
+    });
+    const ulkeSirali = Object.entries(ulkeSayac).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    let ulkeHtml = "";
+    if (ulkeSirali.length === 0) ulkeHtml = '<p class="bos">Veri yok</p>';
+    else ulkeSirali.forEach(([ip, adet]) => {
+        ulkeHtml += `<div class="ulke-item"><span>${ip}</span><span>${adet}x</span></div>`;
+    });
+    document.getElementById("ulkeListesi").innerHTML = ulkeHtml;
+
+    // Son 1 saat
+    const s1Kritik = son1SaatKayit.filter(k => k.seviye === "kritik").length;
+    const s1Supheli = son1SaatKayit.filter(k => k.seviye === "supheli").length;
+    const s1Temiz = son1SaatKayit.filter(k => k.seviye === "temiz").length;
+    const s1Toplam = son1SaatKayit.length;
+    const s1Oran = s1Toplam > 0 ? Math.round((s1Temiz / s1Toplam) * 100) : 100;
+    document.getElementById("saatOzet").innerHTML = `
+        <div class="buyuk-sayi" style="color:${s1Kritik>0?'#ff4444':'#40e0d0'};">%${s1Oran}</div>
+        <div>Temiz oranı</div>
+        <div class="alt-bilgi">${s1Toplam} tarama: ${s1Temiz} temiz, ${s1Supheli} şüpheli, ${s1Kritik} kritik</div>
+    `;
+
+    // Harita (Leaflet)
+    setTimeout(() => haritaGuncelle(son7Kayit.filter(k => k.seviye === "kritik")), 300);
+}
+
+function pastaCiz(temiz, supheli, kritik, toplam) {
+    const canvas = document.getElementById("pastaChart");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    const cx = w/2, cy = h/2, r = 80;
+    ctx.clearRect(0,0,w,h);
+
+    const veriler = [
+        { deger: temiz, renk: "#40e0d0", etiket: "Temiz" },
+        { deger: supheli, renk: "#ffaa00", etiket: "Şüpheli" },
+        { deger: kritik, renk: "#ff4444", etiket: "Kritik" }
+    ];
+
+    let baslangic = -Math.PI/2;
+    veriler.forEach(v => {
+        if (v.deger === 0) return;
+        const dilim = (v.deger / toplam) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, baslangic, baslangic + dilim);
+        ctx.fillStyle = v.renk;
+        ctx.fill();
+        baslangic += dilim;
+    });
+
+    // Ortadaki toplam
+    ctx.fillStyle = "#1a1a2e";
+    ctx.beginPath();
+    ctx.arc(cx, cy, 40, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "#eee";
+    ctx.font = "bold 16px Segoe UI";
+    ctx.textAlign = "center";
+    ctx.fillText(toplam, cx, cy+6);
+
+    // Legend
+    let legendHtml = "";
+    veriler.forEach(v => {
+        legendHtml += `<div class="pasta-legend-item"><span class="pasta-legend-dot" style="background:${v.renk};"></span> ${v.etiket}: ${v.deger} (%${Math.round((v.deger/toplam)*100)})</div>`;
+    });
+    document.getElementById("pastaLegend").innerHTML = legendHtml;
+}
+
+function haritaGuncelle(kritikIPler) {
+    const haritaDiv = document.getElementById("harita");
+    if (!haritaDiv) return;
+
+    if (!haritaObj) {
+        haritaObj = L.map("harita").setView([30, 0], 2);
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+            attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+        }).addTo(haritaObj);
+    }
+
+    // Eski marker'ları temizle
+    haritaObj.eachLayer(layer => {
+        if (layer instanceof L.CircleMarker) haritaObj.removeLayer(layer);
+    });
+
+    // Her kritik IP için marker (konum bilgisi lazım, şimdilik rastgele dağıtalım veya IP'den tahmin)
+    // Gerçek konum için ipinfo verisi lazım, şimdilik bilinmiyorsa atlama
+    kritikIPler.forEach(k => {
+        // localStorage'da konum yok, o yüzden harita boş kalabilir
+        // İleri aşamada IP bazlı konum ekleriz
+    });
+
+    // Şimdilik örnek noktalar (test için)
+    if (kritikIPler.length === 0) {
+        // Boş, haritayı sıfırla
+    }
+}

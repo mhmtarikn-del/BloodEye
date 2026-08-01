@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BloodEye - Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%231a1a2e' stroke='%23e94560' stroke-width='3'/><circle cx='50' cy='48' r='16' fill='%23990000'/><circle cx='50' cy='48' r='7' fill='%23000'/><circle cx='46' cy='44' r='3' fill='%23ff4444'/><path d='M20 30 L40 38' stroke='%23e94560' stroke-width='3' stroke-linecap='round'/><path d='M80 30 L60 38' stroke='%23e94560' stroke-width='3' stroke-linecap='round'/></svg>">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -24,7 +25,7 @@
             </div>
             <button class="menu-btn active" onclick="sayfaGoster('dashboard')">📊 Dashboard</button>
             <button class="menu-btn" onclick="sayfaGoster('detector')">🔍 IP Dedektörü</button>
-            <button class="menu-btn disabled">📋 Tehdit Analizi</button>
+                        <button class="menu-btn" onclick="sayfaGoster('tehdit')">📋 Tehdit Analizi</button>
             <button class="menu-btn disabled">📜 Log İzleyici</button>
             <button class="menu-btn disabled">⚙️ Ayarlar</button>
             <div class="menu-footer">
@@ -85,6 +86,58 @@
             </div>
 
             <!-- IP Dedektörü -->
+                         <!-- Tehdit Analizi -->
+            <div id="sayfa-tehdit" class="sayfa">
+                <div class="tehdit-container">
+                    <div class="tehdit-ust">
+                        <div class="db-card">
+                            <h3>📊 Risk Dağılımı (7 gün)</h3>
+                            <div class="pasta-container">
+                                <canvas id="pastaChart" width="200" height="200"></canvas>
+                            </div>
+                            <div class="pasta-legend" id="pastaLegend"></div>
+                        </div>
+                        <div class="db-card">
+                            <h3>🌍 En Çok Şikayet Edilen Ülkeler</h3>
+                            <div id="ulkeListesi" class="ulke-list"></div>
+                        </div>
+                        <div class="db-card">
+                            <h3>⚡ Son 1 Saat Özeti</h3>
+                            <div class="saat-ozet" id="saatOzet"></div>
+                        </div>
+                    </div>
+                    <div class="db-card db-genis">
+                        <h3>🗺️ Küresel Tehdit Haritası (Kritik IP'ler)</h3>
+                        <div id="harita" style="height:400px; border-radius:8px;"></div>
+                    </div>
+                </div>
+            </div>
+                        <!-- Tehdit Analizi -->
+            <div id="sayfa-tehdit" class="sayfa">
+                <div class="tehdit-container">
+                    <div class="tehdit-ust">
+                        <div class="db-card">
+                            <h3>📊 Risk Dağılımı (7 gün)</h3>
+                            <div class="pasta-container">
+                                <canvas id="pastaChart" width="200" height="200"></canvas>
+                            </div>
+                            <div class="pasta-legend" id="pastaLegend"></div>
+                        </div>
+                        <div class="db-card">
+                            <h3>🌍 En Çok Şikayet Edilen Ülkeler</h3>
+                            <div id="ulkeListesi" class="ulke-list"></div>
+                        </div>
+                        <div class="db-card">
+                            <h3>⚡ Son 1 Saat Özeti</h3>
+                            <div class="saat-ozet" id="saatOzet"></div>
+                        </div>
+                    </div>
+                    <div class="db-card db-genis">
+                        <h3>🗺️ Küresel Tehdit Haritası (Kritik IP'ler)</h3>
+                        <div id="harita" style="height:400px; border-radius:8px;"></div>
+                    </div>
+                </div>
+            </div>
             <div id="sayfa-detector" class="sayfa">
                 <div class="container">
                     <textarea id="ipInput" placeholder="İp adresi içeren metinleri girin...&#10;Örn:&#10;8.8.8.8 Google DNS&#10;1.1.1.1 Cloudflare"></textarea>
@@ -114,6 +167,7 @@
             </div>
         </main>
     </div>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
