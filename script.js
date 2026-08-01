@@ -274,6 +274,7 @@ async function vtOtomatikBaslat(veriler) {
         try {
             const res = await fetch(`https://bloodeye-proxy.onrender.com/vt?ip=${v.ip}`).then(r => r.json());
             vtHamVeriler[i] = res;
+                        console.log("VT cevap:", v.ip, res);
             if (res.data) {
                 const stats = res.data.attributes.last_analysis_stats;
                 const mal = stats.malicious || 0;
