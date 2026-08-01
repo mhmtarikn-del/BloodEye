@@ -202,44 +202,6 @@ async function sorgula() {
         return;
     }
 
-    // Son 24 saatte sorgulanmış IP'leri filtrele
-    const gecmis = gecmisiGetir();
-    const son24s = Date.now() - 24 * 60 * 60 * 1000;
-    const son24IPler = new Set(gecmis.filter(k => k.tarih > son24s).map(k => k.ip));
-    const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
-
-    if (filtrelenmisIP.length === 0) {
-        sonucDiv.innerHTML = '<p class="hata">Tüm IP\'ler son 24 saat içinde sorgulanmış. Yeni sorguya gerek yok.</p>';
-        return;
-    }
-
-    // Son 24 saatte sorgulanmış IP'leri filtrele
-    const gecmis = gecmisiGetir();
-    const son24s = Date.now() - 24 * 60 * 60 * 1000;
-    const son24IPler = new Set(gecmis.filter(k => k.tarih > son24s).map(k => k.ip));
-    const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
-
-    if (filtrelenmisIP.length === 0) {
-        sonucDiv.innerHTML = '<p class="hata">Tüm IP\'ler son 24 saat içinde sorgulanmış. Yeni sorguya gerek yok.</p>';
-        return;
-    }
-
-    // Son 24 saatte sorgulanmış IP'leri filtrele
-    const gecmis = gecmisiGetir();
-    const son24s = Date.now() - 24 * 60 * 60 * 1000;
-    const son24IPler = new Set(gecmis.filter(k => k.tarih > son24s).map(k => k.ip));
-    const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
-
-    if (filtrelenmisIP.length === 0) {
-        sonucDiv.innerHTML = '<p class="hata">Tüm IP\'ler son 24 saat içinde sorgulanmış. Yeni sorguya gerek yok.</p>';
-        return;
-    }
-
-    if (benzersizIP.length === 0) {
-        sonucDiv.innerHTML = '<p class="hata">Geçerli IP adresi bulunamadı.</p>';
-        return;
-    }
-
     vtIptal = true;
     btn.disabled = true;
     btn.textContent = "Sorgulanıyor...";
