@@ -16,6 +16,10 @@ function gecmisiGetir() {
 }
 function gecmiseEkle(kayit) {
     const gecmis = gecmisiGetir();
+    const puan = Math.max(kayit.abusePuan || 0, kayit.infoPuan || 0);
+    if (puan >= 21) kayit.seviye = "kritik";
+    else if (puan >= 15) kayit.seviye = "supheli";
+    else kayit.seviye = "temiz";
     gecmis.push(kayit);
     const birHaftaOnce = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const filtrelenmis = gecmis.filter(k => k.tarih > birHaftaOnce);
@@ -28,19 +32,20 @@ function dashboardGuncelle() {
     const simdi = Date.now();
     const son24s = simdi - 24 * 60 * 60 * 1000;
 
-    document.getElementById("istToplam").textContent = gecmis.length;
-    const temiz = gecmis.filter(k => !k.supheli).length;
-    const supheli = gecmis.filter(k => k.supheli).length;
-    document.getElementById("istTemiz").textContent = temiz;
-    document.getElementById("istSupheli").textContent = supheli;
+        document.getElementById("istToplam").textContent = gecmis.length;
+    const temizSayi = gecmis.filter(k => k.seviye === "temiz").length;
+    const supheliSayi = gecmis.filter(k => k.seviye === "supheli").length;
+    const kritikSayi = gecmis.filter(k => k.seviye === "kritik").length;
+    document.getElementById("istTemiz").textContent = temizSayi;
+    document.getElementById("istSupheli").textContent = supheliSayi + kritikSayi;
 
     // Saldırı seviyesi
-    const son24Kayit = gecmis.filter(k => k.tarih > son24s);
-    const son24Supheli = son24Kayit.filter(k => k.supheli).length;
-    const oran = son24Kayit.length > 0 ? Math.round((son24Supheli / son24Kayit.length) * 100) : 0;
+        const son24Kayit = gecmis.filter(k => k.tarih > son24s);
+    const son24Tehlikeli = son24Kayit.filter(k => k.seviye === "kritik" || k.seviye === "supheli").length;
+    const oran = son24Kayit.length > 0 ? Math.round((son24Tehlikeli / son24Kayit.length) * 100) : 0;
     const gauge = document.getElementById("gaugeCircle");
     document.getElementById("gaugeText").textContent = "%" + oran;
-    document.getElementById("gaugeDetay").textContent = `${son24Supheli}/${son24Kayit.length} IP`;
+    document.getElementById("gaugeDetay").textContent = `${son24Tehlikeli}/${son24Kayit.length} IP`;
     if (oran >= 70) gauge.style.borderColor = "#ff4444";
     else if (oran >= 40) gauge.style.borderColor = "#ffaa00";
     else gauge.style.borderColor = "#40e0d0";
@@ -76,7 +81,31 @@ function dashboardGuncelle() {
         });
     }
     document.getElementById("kritikList").innerHTML = kritikHtml;
+    // Kritik IP listesi
+    const kritikIPs = [...new Set(gecmis.filter(k => k.seviye === "kritik").map(k => k.ip))];
+    let kritikHtml = "";
+    if (kritikIPs.length === 0) {
+        kritikHtml = '<p class="bos">Kritik IP yok</p>';
+    } else {
+        kritikIPs.slice(0, 15).forEach(ip => {
+            const adet = gecmis.filter(k => k.ip === ip && k.seviye === "kritik").length;
+            kritikHtml += `<div class="kritik-item supheli"><span>🔴 ${ip}</span><span>${adet}x</span></div>`;
+        });
+    }
+    document.getElementById("kritikList").innerHTML = kritikHtml;
 
+    // Şüpheli IP listesi
+    const supheliIPs = [...new Set(gecmis.filter(k => k.seviye === "supheli").map(k => k.ip))];
+    let supheliHtml = "";
+    if (supheliIPs.length === 0) {
+        supheliHtml = '<p class="bos">Şüpheli IP yok</p>';
+    } else {
+        supheliIPs.slice(0, 15).forEach(ip => {
+            const adet = gecmis.filter(k => k.ip === ip && k.seviye === "supheli").length;
+            supheliHtml += `<div class="kritik-item" style="color:#ffaa00;"><span>🟠 ${ip}</span><span>${adet}x</span></div>`;
+        });
+    }
+    document.getElementById("supheliList").innerHTML = supheliHtml;
     haftalikGrafikCiz(gecmis);
 }
 
@@ -90,15 +119,17 @@ function haftalikGrafikCiz(gecmis) {
         gunler.push(`${gunAdi} ${ayAdi} ${yil}`);
     }
 
-    const veri = [0,0,0,0,0,0,0];
+        const veri = [0,0,0,0,0,0,0];
     const supheliVeri = [0,0,0,0,0,0,0];
+    const kritikVeri = [0,0,0,0,0,0,0];
     const simdi = Date.now();
 
     gecmis.forEach(k => {
         const gunFarki = Math.floor((simdi - k.tarih) / (24 * 60 * 60 * 1000));
         if (gunFarki < 7) {
             veri[6 - gunFarki]++;
-            if (k.supheli) supheliVeri[6 - gunFarki]++;
+            if (k.seviye === "supheli") supheliVeri[6 - gunFarki]++;
+            if (k.seviye === "kritik") kritikVeri[6 - gunFarki]++;
         }
     });
 
@@ -133,8 +164,8 @@ function haftalikGrafikCiz(gecmis) {
                 tooltipDiv.style.display = "block";
                 tooltipDiv.style.left = (rect.left + x + barWidth) + "px";
                 tooltipDiv.style.top = (rect.top + my - 50) + "px";
-                tooltipDiv.innerHTML = `<b>${gunler[i]}</b><br><span style="color:#40e0d0;">● Temiz: ${veri[i] - supheliVeri[i]}</span><br><span style="color:#ff4444;">● Kritik: ${supheliVeri[i]}</span>`;
-                found = true;
+                                tooltipDiv.innerHTML = `<b>${gunler[i]}</b><br><span style="color:#40e0d0;">● Temiz: ${veri[i] - supheliVeri[i] - kritikVeri[i]}</span><br><span style="color:#ffaa00;">● Şüpheli: ${supheliVeri[i]}</span><br><span style="color:#ff4444;">● Kritik: ${kritikVeri[i]}</span>`;
+                                found = true;
                 break;
             }
         }
@@ -144,13 +175,16 @@ function haftalikGrafikCiz(gecmis) {
 
     for (let i = 0; i < 7; i++) {
         const x = i * (barWidth * 2 + gap) + 30;
-        const h = (veri[i] / max) * 140;
-        const sh = (supheliVeri[i] / max) * 140;
+               const temizH = ((veri[i] - supheliVeri[i] - kritikVeri[i]) / max) * 140;
+        const supheliH = (supheliVeri[i] / max) * 140;
+        const kritikH = (kritikVeri[i] / max) * 140;
 
         ctx.fillStyle = "#40e0d0";
-        ctx.fillRect(x, 150 - h, barWidth, h);
+        ctx.fillRect(x, 150 - temizH, barWidth, temizH);
+        ctx.fillStyle = "#ffaa00";
+        ctx.fillRect(x, 150 - temizH - supheliH, barWidth, supheliH);
         ctx.fillStyle = "#ff4444";
-        ctx.fillRect(x + barWidth, 150 - sh, barWidth, sh);
+        ctx.fillRect(x, 150 - temizH - supheliH - kritikH, barWidth, kritikH);
 
         ctx.fillStyle = "#aaa";
         ctx.font = "10px Segoe UI";
@@ -210,10 +244,10 @@ async function sorgula() {
     sonVeriler = sonuclar;
     vtHamVeriler = new Array(sonuclar.length).fill(null);
 
-    sonuclar.forEach(v => {
+        sonuclar.forEach(v => {
         const ap = abuseSusPuan(v);
         const ip = infoSusPuan(v);
-        gecmiseEkle({ ip: v.ip, tarih: Date.now(), supheli: (ap >= 20 || ip >= 20), abusePuan: ap, infoPuan: ip });
+        gecmiseEkle({ ip: v.ip, tarih: Date.now(), abusePuan: ap, infoPuan: ip });
     });
 
     tabloOlustur(sonuclar);
@@ -243,11 +277,7 @@ function tabloOlustur(veriler) {
         html += `<td class="${is}">%${ip}</td>`;
         html += `<td class="${as}">%${ap}</td>`;
         html += `<td id="vt-${index}" class="vt-bekliyor">...</td>`;
-        html += `<td style="white-space:nowrap;">`;
-html += `<button class="detayBtn" onclick="detayGoster(${index})">Detay</button> `;
-
-html += `<button class="detayBtn tekrarDene" id="td-${index}" style="display:${hataVar ? 'inline-block' : 'none'}; background:#ffaa00;" onclick="tekrarDene(${index})">T.Dene</button>`;
-        html += "</tr>";
+        html += `<td><button class="detayBtn" onclick="detayGoster(${index})">Detay</button></td>`;
     });
 
     html += "</table>";
@@ -430,7 +460,11 @@ function gecmisiGoster() {
 
     sonKayitlar.forEach(k => {
         const tarih = new Date(k.tarih).toLocaleString("tr-TR");
-        const durum = k.supheli ? '<span style="color:#ff4444;">⚠️ Şüpheli</span>' : '<span style="color:#40e0d0;">✅ Temiz</span>';
+                const puan = Math.max(k.abusePuan || 0, k.infoPuan || 0);
+        let durum = '';
+        if (puan >= 21) durum = '<span style="color:#ff4444;">🔴 Kritik</span>';
+        else if (puan >= 15) durum = '<span style="color:#ffaa00;">🟠 Şüpheli</span>';
+        else durum = '<span style="color:#40e0d0;">🟢 Temiz</span>';
         html += `<tr><td>${k.ip}</td><td>${tarih}</td><td>${durum}</td><td>%${k.abusePuan || 0}</td><td>%${k.infoPuan || 0}</td></tr>`;
     });
 
@@ -439,41 +473,3 @@ function gecmisiGoster() {
 }
 dashboardGuncelle();
 gecmisiGoster();
-async function tekrarDene(index) {
-    const v = sonVeriler[index];
-    const ip = v.ip;
-    const tdBtn = document.getElementById(`td-${index}`);
-    
-    if (tdBtn) { tdBtn.disabled = true; tdBtn.textContent = "..."; }
-    document.getElementById(`vt-${index}`).textContent = "...";
-    document.getElementById(`vt-${index}`).style.color = "#ffaa00";
-
-    // ipinfo tekrar
-    try {
-        v.ipInfo = await fetch(`https://bloodeye-proxy.onrender.com/ipinfo?ip=${ip}`).then(r => r.json());
-    } catch(e) {}
-
-    // abuse tekrar
-    try {
-        v.abuse = await fetch(`https://bloodeye-proxy.onrender.com/abuse?ip=${ip}`).then(r => r.json());
-    } catch(e) {}
-
-    // VT tekrar
-    try {
-        const res = await fetch(`https://bloodeye-proxy.onrender.com/vt?ip=${ip}`).then(r => r.json());
-        vtHamVeriler[index] = res;
-        if (res.data) {
-            const stats = res.data.attributes.last_analysis_stats;
-            const mal = stats.malicious || 0;
-            const tot = Object.values(stats).reduce((a,b) => a+b, 0);
-            document.getElementById(`vt-${index}`).textContent = `${mal}/${tot}`;
-            document.getElementById(`vt-${index}`).style.color = mal > 0 ? "#ff4444" : "#40e0d0";
-        }
-    } catch(e) {
-        document.getElementById(`vt-${index}`).textContent = "Hata";
-    }
-
-    // Tabloda puanları güncelle (basit yaklaşım: tabloyu yeniden oluştur)
-    tabloOlustur(sonVeriler);
-    gecmisiGoster();
-}
