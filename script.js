@@ -603,8 +603,51 @@ function hashGecmisiGoster() {
     html += "</table>";
     document.getElementById("hashGecmisTablo").innerHTML = html;
 }
+function hashDetayGoster(hash) {
+    const v = hashSonVeriler.find(s => s.hash === hash);
+    if (!v || !v.data || !v.data.data) {
+        alert("Detay verisi bulunamadı.");
+        return;
+    }
+
+    const attr = v.data.data.attributes;
+    const stats = attr.last_analysis_stats || {};
+    const results = attr.last_analysis_results || {};
+    const total = Object.values(stats).reduce((a,b) => a+b, 0);
+
+    let h = `<div class="popup-overlay" onclick="this.remove()">`;
+    h += `<div class="popup popup-vt" onclick="event.stopPropagation()">`;
+    h += `<h2>🛡️ VT Hash Detay</h2>`;
+    h += `<button class="popup-close" onclick="document.querySelector('.popup-overlay').remove()">✕</button>`;
+    h += `<p style="font-family:monospace;font-size:11px;word-break:break-all;margin-bottom:10px;">${hash}</p>`;
+    h += `<div class="vt-bilgi-satir"><span>Toplam motor:</span><span>${total}</span></div>`;
+    h += `<div class="vt-bilgi-satir"><span>Zararlı:</span><span style="color:#c62828;font-weight:bold;">${stats.malicious||0}</span></div>`;
+    h += `<div class="vt-bilgi-satir"><span>Şüpheli:</span><span style="color:#ffaa00;">${stats.suspicious||0}</span></div>`;
+    h += `<div class="vt-bilgi-satir"><span>Temiz:</span><span style="color:#40e0d0;">${stats.harmless||0}</span></div>`;
+    h += `<div class="vt-bilgi-satir"><span>Tespit edilemedi:</span><span>${stats.undetected||0}</span></div>`;
+    h += `<div class="vt-bilgi-satir"><span>Popüler Ad:</span><span>${attr.meaningful_name || "-"}</span></div>`;
+
+    const maliciousEngines = Object.entries(results).filter(([k,v]) => v.category === "malicious");
+    if (maliciousEngines.length > 0) {
+        h += `<h4 style="color:#c62828;margin-top:10px;">⚠️ Zararlı Tespit Eden Motorlar:</h4>`;
+        maliciousEngines.forEach(([motor, detay]) => {
+            h += `<span class="vt-etiket">${motor}: ${detay.result || "zararlı"}</span>`;
+        });
+    }
+
+    const suspiciousEngines = Object.entries(results).filter(([k,v]) => v.category === "suspicious");
+    if (suspiciousEngines.length > 0) {
+        h += `<h4 style="color:#ffaa00;margin-top:10px;">⚠️ Şüpheli Tespit Eden Motorlar:</h4>`;
+        suspiciousEngines.forEach(([motor, detay]) => {
+            h += `<span class="vt-etiket">${motor}: ${detay.result || "şüpheli"}</span>`;
+        });
+    }
+
+    h += `</div></div>`;
+    document.body.insertAdjacentHTML("beforeend", h);
+}
 function hashTablosuOlustur(veriler) {
-    let html = "<table><tr><th>Hash</th><th>Tip</th><th>Zararlı</th><th>Temiz</th><th>Popüler Ad</th></tr>";
+    let html = "<table><tr><th>Hash</th><th>Tip</th><th>Zararlı</th><th>Temiz</th><th>Popüler Ad</th><th></th></tr>";
 
     veriler.forEach((v) => {
         const d = v.data;
@@ -623,11 +666,12 @@ function hashTablosuOlustur(veriler) {
 
         const malRengi = mal > 0 ? 'style="color:#c62828;font-weight:bold;"' : 'style="color:#40e0d0;"';
                 const kisaHash = v.hash.length > 20 ? v.hash.substring(0,8) + "..." + v.hash.substring(v.hash.length-8) : v.hash;
-        html += `<tr><td style="font-family:monospace;font-size:11px;" title="${v.hash}">${kisaHash}</td><td>${tip}</td><td ${malRengi}>${mal}</td><td style="color:#40e0d0;">${temiz}</td><td>${ad}</td></tr>`;
+        html += `<tr><td style="font-family:monospace;font-size:11px;" title="${v.hash}">${kisaHash}</td><td>${tip}</td><td ${malRengi}>${mal}</td><td style="color:#40e0d0;">${temiz}</td><td>${ad}</td><td><button class="detayBtn" onclick="hashDetayGoster('${v.hash}')">VT Detay</button></td></tr>`;
     });
 
     html += "</table>";
     document.getElementById("hashSonuc").innerHTML = html;
+        document.getElementById("hashVtDetayBtn").style.display = "block";
 }
 dashboardGuncelle();
 gecmisiGoster();
