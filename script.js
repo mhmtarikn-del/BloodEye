@@ -301,14 +301,17 @@ async function vtOtomatikBaslat(veriler) {
         await new Promise(r => setTimeout(r, 15000));
     }
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
-        // VT sonuçlarını localStorage'a kaydet
+           // VT sonuçlarını localStorage'a kaydet
     const gecmis = gecmisiGetir();
+    console.log("VT bitti, güncelleme başlıyor. veriler:", veriler.length);
     for (let i = 0; i < veriler.length; i++) {
         const v = veriler[i];
+        console.log(`IP: ${v.ip}, vtSonuc: ${v.vtSonuc}`);
         if (!v.vtSonuc) continue;
         for (let j = gecmis.length - 1; j >= 0; j--) {
             if (gecmis[j].ip === v.ip && !gecmis[j].vtSonuc) {
                 gecmis[j].vtSonuc = v.vtSonuc;
+                console.log(`Güncellendi: ${v.ip} -> ${v.vtSonuc}`);
                 break;
             }
         }
