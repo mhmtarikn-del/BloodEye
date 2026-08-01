@@ -301,6 +301,13 @@ async function vtOtomatikBaslat(veriler) {
         await new Promise(r => setTimeout(r, 15000));
     }
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
+        // VT sonuçlarını localStorage'a kaydet
+    const gecmis = gecmisiGetir();
+    veriler.forEach(v => {
+        const kayit = gecmis.find(k => k.ip === v.ip && !k.vtSonuc);
+        if (kayit) kayit.vtSonuc = v.vtSonuc || "-";
+    });
+    localStorage.setItem("bloodeye_gecmis", JSON.stringify(gecmis));
     gecmisiGoster();
 }
 
