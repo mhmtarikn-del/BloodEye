@@ -327,7 +327,7 @@ async function vtOtomatikBaslat(veriler) {
    //         }
     //    }
    // }
-    localStorage.setItem("bloodeye_gecmis", JSON.stringify(gecmis));
+    //localStorage.setItem("bloodeye_gecmis", JSON.stringify(gecmis));
     gecmisiGoster();
 }
 
