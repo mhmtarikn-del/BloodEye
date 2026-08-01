@@ -42,6 +42,17 @@ app.get("/vt", async (req, res) => {
         res.json(data);
     } catch(e) { res.status(500).json({ error: e.message }); }
 });
+app.get("/vt-hash", async (req, res) => {
+    const hash = req.query.hash;
+    if (!hash) return res.status(400).json({ error: "hash gerekli" });
+    try {
+        const response = await fetch(`https://www.virustotal.com/api/v3/files/${hash}`, {
+            headers: { "x-apikey": VT_TOKEN, "Accept": "application/json" }
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch(e) { res.status(500).json({ error: e.message }); }
+});
 app.get("/", (req, res) => {
     res.send("BloodEye Proxy - Running");
 });

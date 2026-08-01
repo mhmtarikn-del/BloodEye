@@ -25,8 +25,9 @@
             </div>
             <button class="menu-btn active" onclick="sayfaGoster('dashboard')">📊 Dashboard</button>
             <button class="menu-btn" onclick="sayfaGoster('detector')">🔍 IP Dedektörü</button>
+                        <button class="menu-btn" onclick="sayfaGoster('hashdetector')">🔐 Hash Dedektörü</button>
                         <button class="menu-btn" onclick="sayfaGoster('tehdit')">📋 Tehdit Analizi</button>
-            <button class="menu-btn disabled">📜 Log İzleyici</button>
+           
             <button class="menu-btn disabled">⚙️ Ayarlar</button>
             <div class="menu-footer">
                 <div class="versiyon">v0.51</div>
@@ -161,6 +162,19 @@
                                 <div id="gecmisPanel" style="display:none;">
                     <h3 style="color:#e94560; margin-top:30px;">🕐 Son 24 Saat Geçmişi</h3>
                     <div id="gecmisTablo"></div>
+                </div>
+            </div>
+                        <!-- Hash Dedektörü -->
+            <div id="sayfa-hashdetector" class="sayfa">
+                <div class="container">
+                    <textarea id="hashInput" placeholder="Hash değerlerini alt alta girin...&#10;Örn:&#10;d41d8cd98f00b204e9800998ecf8427e&#10;da39a3ee5e6b4b0d3255bfef95601890afd80709"></textarea>
+                    <div class="versiyon">v0.50</div>
+                    <button id="hashSorguBtn">Hash Sorgula</button>
+                    <div id="hashSonuc"></div>
+                    <div id="vtHashPanel" style="display:none;">
+                        <div class="vt-baslik">🛡️ Virustotal Hash Tarama <span id="vtHashDurum" class="vt-durum">Bekleniyor...</span></div>
+                        <div id="vtHashSonuc"></div>
+                    </div>
                 </div>
             </div>
         </main>

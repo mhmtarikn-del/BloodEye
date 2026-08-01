@@ -491,6 +491,82 @@ async function haritaGuncelle(kritikIPler) {
         }
     });
 }
+// Hash Dedektörü
+let hashSonVeriler = [];
+let hashVtVeriler = [];
 
+document.getElementById("hashSorguBtn")?.addEventListener("click", hashSorgula);
+
+async function hashSorgula() {
+    const input = document.getElementById("hashInput").value.trim();
+    const sonucDiv = document.getElementById("hashSonuc");
+    const btn = document.getElementById("hashSorguBtn");
+
+    if (!input) {
+        sonucDiv.innerHTML = '<p class="hata">Lütfen en az bir hash girin.</p>';
+        return;
+    }
+
+    const hashRegex = /\b[a-fA-F0-9]{32}(?:[a-fA-F0-9]{8})?(?:[a-fA-F0-9]{24})?\b/g;
+    const hashListesi = input.match(hashRegex) || [];
+    const benzersizHash = [...new Set(hashListesi.map(h => h.toLowerCase()))];
+
+    if (benzersizHash.length === 0) {
+        sonucDiv.innerHTML = '<p class="hata">Geçerli hash bulunamadı (MD5/SHA1/SHA256).</p>';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Sorgulanıyor...";
+    document.getElementById("vtHashPanel").style.display = "none";
+    sonucDiv.innerHTML = '<p class="loading">Virustotal hash sorgulanıyor...</p>';
+
+    const sonuclar = [];
+
+    for (let i = 0; i < benzersizHash.length; i++) {
+        const hash = benzersizHash[i];
+        sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${benzersizHash.length} - ${hash.substring(0,16)}...</p>`;
+
+        try {
+            const res = await fetch(`https://bloodeye-proxy.onrender.com/vt-hash?hash=${hash}`).then(r => r.json());
+            sonuclar.push({ hash, data: res });
+        } catch(e) {
+            sonuclar.push({ hash, data: null });
+        }
+
+        await new Promise(r => setTimeout(r, 15000));
+    }
+
+    hashSonVeriler = sonuclar;
+    hashTablosuOlustur(sonuclar);
+    btn.disabled = false;
+    btn.textContent = "Hash Sorgula";
+}
+
+function hashTablosuOlustur(veriler) {
+    let html = "<table><tr><th>Hash</th><th>Tip</th><th>Zararlı</th><th>Temiz</th><th>Popüler Ad</th></tr>";
+
+    veriler.forEach((v) => {
+        const d = v.data;
+        let tip = "-", mal = "-", temiz = "-", ad = "-";
+
+        if (d && d.data) {
+            const attr = d.data.attributes;
+            tip = v.hash.length === 32 ? "MD5" : v.hash.length === 40 ? "SHA1" : "SHA256";
+            const stats = attr.last_analysis_stats || {};
+            mal = stats.malicious || 0;
+            temiz = stats.harmless || 0;
+            ad = attr.meaningful_name || attr.popular_threat_classification?.popular_threat_name || "-";
+        } else if (d && d.error) {
+            ad = "Bulunamadı";
+        }
+
+        const malRengi = mal > 0 ? 'style="color:#c62828;font-weight:bold;"' : 'style="color:#40e0d0;"';
+        html += `<tr><td style="font-family:monospace;font-size:11px;">${v.hash}</td><td>${tip}</td><td ${malRengi}>${mal}</td><td style="color:#40e0d0;">${temiz}</td><td>${ad}</td></tr>`;
+    });
+
+    html += "</table>";
+    document.getElementById("hashSonuc").innerHTML = html;
+}
 dashboardGuncelle();
 gecmisiGoster();
