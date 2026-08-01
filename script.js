@@ -608,26 +608,9 @@ function pastaCiz(temiz, supheli, kritik, toplam) {
     document.getElementById("pastaLegend").innerHTML = legendHtml;
 }
 
-let leafletYuklu = false;
-
 async function haritaGuncelle(kritikIPler) {
     const haritaDiv = document.getElementById("harita");
     if (!haritaDiv) return;
-
-    if (!leafletYuklu) {
-        await new Promise((resolve) => {
-            const css = document.createElement("link");
-            css.rel = "stylesheet";
-            css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-            document.head.appendChild(css);
-
-            const js = document.createElement("script");
-            js.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-            js.onload = resolve;
-            document.body.appendChild(js);
-        });
-        leafletYuklu = true;
-    }
 
     if (!haritaObj) {
         haritaObj = L.map("harita").setView([30, 0], 2);
