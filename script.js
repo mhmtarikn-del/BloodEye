@@ -280,7 +280,7 @@ async function vtOtomatikBaslat(veriler) {
                 const mal = stats.malicious || 0;
                 const tot = Object.values(stats).reduce((a,b) => a+b, 0);
                 document.getElementById(`vt-${i}`).textContent = `${mal}/${tot}`;
-                                sonVeriler[i].vtSonuc = `${mal}/${tot}`;
+                                v.vtSonuc = `${mal}/${tot}`;
                 if (mal > 0) {
                     document.getElementById(`vt-${i}`).style.color = "#c62828";
                     document.getElementById(`vt-${i}`).style.fontWeight = "bold";
@@ -288,14 +288,14 @@ async function vtOtomatikBaslat(veriler) {
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ⚠️`;
                 } else {
                     document.getElementById(`vt-${i}`).style.color = "#40e0d0";
-                                    sonVeriler[i].vtSonuc = `${mal}/${tot}`;
+                                    v.vtSonuc = `${mal}/${tot}`;
                     document.getElementById(sid).className = "vt-satir vt-temiz";
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ✅`;
                 }
             }
         } catch(e) {
             document.getElementById(`vt-${i}`).textContent = "Hata";
-                        sonVeriler[i].vtSonuc = "Hata";
+                                    v.vtSonuc = "Hata";
             document.getElementById(sid).textContent = `${v.ip} → Hata`;
         }
         await new Promise(r => setTimeout(r, 15000));
