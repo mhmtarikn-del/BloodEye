@@ -1,5 +1,9 @@
 * { margin:0; padding:0; box-sizing:border-box; }
-
+/* Dark Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0d1730; }
+::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #e94560; }
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #1a1a2e;
@@ -90,9 +94,10 @@ body {
 /* Ana İçerik */
 .content-area {
     flex: 1;
-    padding: 25px;
+    padding: 25px 35px;
     order: 1;
     overflow-y: auto;
+    min-width: 0;
 }
 
 .sayfa { display:none; }
@@ -197,7 +202,7 @@ body {
 .ist-satir:last-child { border-bottom:none; }
 
 /* IP Dedektörü */
-.container { width:100%; max-width:900px; margin:0 auto; }
+.container { width:100%; max-width:1100px; margin:0 auto; }
 
 textarea {
     width: 100%;
@@ -236,7 +241,8 @@ table {
     margin-bottom: 25px;
 }
 th { background:#0f3460; padding:12px; text-align:left; font-size:13px; }
-td { padding:10px 12px; border-bottom:1px solid #0f3460; font-size:13px; }
+td { padding:10px 12px; border-bottom:1px solid #0f3460; font-size:13px; white-space:nowrap; }
+td:last-child { white-space:nowrap; min-width:130px; }
 tr:hover { background:#1a1a3e; }
 
 .sus-yuksek { color:#ff4444; font-weight:bold; }
