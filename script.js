@@ -80,11 +80,16 @@ function dashboardGuncelle() {
     aylikGrafikCiz(gecmis);
 }
 
+JavaScript
 function aylikGrafikCiz(gecmis) {
     const gunler = [];
     for (let i = 29; i >= 0; i--) {
         const gun = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-        gunler.push({ tarih: gun.getDate() + " " + gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase(), tam: gun.toLocaleDateString("tr-TR") });
+        gunler.push({
+            gunSayi: gun.getDate(),
+            ayAd: gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase(),
+            tam: gun.toLocaleDateString("tr-TR")
+        });
     }
 
     const veri = new Array(30).fill(0);
@@ -94,31 +99,40 @@ function aylikGrafikCiz(gecmis) {
 
     gecmis.forEach(k => {
         const gunFarki = Math.floor((simdi - k.tarih) / (24 * 60 * 60 * 1000));
-        if (gunFarki < 30) {
+        if (gunFarki >= 0 && gunFarki < 30) {
             veri[29 - gunFarki]++;
             if (k.seviye === "supheli") supheliVeri[29 - gunFarki]++;
             if (k.seviye === "kritik") kritikVeri[29 - gunFarki]++;
         }
     });
 
-    const max = Math.max(...veri, 1);
-    const container = document.getElementById("chartHaftalik").parentElement;
-    let html = '<div style="display:flex; align-items:flex-end; gap:2px; height:180px; min-width:1000px;">';
+    const max = Math.max(...veri, 5); // Grafik tavanını normalize etmek için min max 5
+    const container = document.getElementById("chartHaftalik");
+    
+    let html = '<div class="chart-30-container">';
 
     for (let i = 0; i < 30; i++) {
         const temiz = veri[i] - supheliVeri[i] - kritikVeri[i];
-        const supH = (supheliVeri[i] / max) * 140;
-        const kriH = (kritikVeri[i] / max) * 140;
-        const temH = (temiz / max) * 140;
+        
+        // Yükseklik hesaplaması (En az 2px referans çizgisi görünür)
+        const temH = Math.max((temiz / max) * 130, temiz > 0 ? 4 : 2);
+        const supH = Math.max((supheliVeri[i] / max) * 130, supheliVeri[i] > 0 ? 4 : 2);
+        const kriH = Math.max((kritikVeri[i] / max) * 130, kritikVeri[i] > 0 ? 4 : 2);
 
-        html += `<div style="display:flex; flex-direction:column; align-items:center; gap:1px;" title="${gunler[i].tam} - Temiz:${temiz} Şüpheli:${supheliVeri[i]} Kritik:${kritikVeri[i]}">`;
-        html += `<div style="display:flex; gap:1px; align-items:flex-end; height:150px;">`;
-        if (temH > 0) html += `<div style="width:10px;height:${temH}px;background:#40e0d0;border-radius:2px 2px 0 0;"></div>`;
-        if (supH > 0) html += `<div style="width:10px;height:${supH}px;background:#ffaa00;border-radius:2px 2px 0 0;"></div>`;
-        if (kriH > 0) html += `<div style="width:10px;height:${kriH}px;background:#c62828;border-radius:2px 2px 0 0;"></div>`;
-        html += `</div>`;
-        if (i % 3 === 0) html += `<span style="font-size:8px;color:#aaa;">${gunler[i].tarih}</span>`;
-        html += `</div>`;
+        const tooltip = `${gunler[i].tam}&#10;🟢 Temiz: ${temiz}&#10;🟠 Şüpheli: ${supheliVeri[i]}&#10;🔴 Kritik: ${kritikVeri[i]}`;
+
+        html += `
+            <div class="chart-col" title="${tooltip}">
+                <div class="bars-track">
+                    <div class="bar bar-temiz" style="height:${temH}px; opacity:${temiz > 0 ? '1' : '0.15'};"></div>
+                    <div class="bar bar-supheli" style="height:${supH}px; opacity:${supheliVeri[i] > 0 ? '1' : '0.15'};"></div>
+                    <div class="bar bar-kritik" style="height:${kriH}px; opacity:${kritikVeri[i] > 0 ? '1' : '0.15'};"></div>
+                </div>
+                <div class="col-label">
+                    <span class="lbl-day">${gunler[i].gunSayi}</span>
+                    <span class="lbl-month">${gunler[i].ayAd}</span>
+                </div>
+            </div>`;
     }
 
     html += '</div>';
