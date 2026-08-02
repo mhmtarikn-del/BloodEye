@@ -9,7 +9,6 @@ window.addEventListener("beforeunload", (e) => {
 });
 let vtHamVeriler = [];
 let vtIptal = false;
-sorguAktif = true;
 let haritaObj = null;
 
 function sayfaGoster(sayfa) {
@@ -418,7 +417,8 @@ function loginPopup() {
 }
 
 async function adminGiris() {
-    const sifre = document.getElementById("adminSifre").value;
+        const sifre = document.getElementById("adminSifre").value;
+    document.getElementById("adminSifre").value = ""; // hemen temizle
     try {
         const res = await fetch("https://bloodeye-proxy.onrender.com/login", {
             method: "POST",
@@ -458,7 +458,8 @@ function sifirlaPopup() {
     document.body.insertAdjacentHTML("beforeend", h);
 }
 async function sifirlaOnay() {
-    const sifre = document.getElementById("sifreInput").value;
+        const sifre = document.getElementById("sifreInput").value;
+    document.getElementById("sifreInput").value = "";
     try {
         const res = await fetch("https://bloodeye-proxy.onrender.com/sifirla", {
             method: "POST",
