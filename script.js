@@ -30,8 +30,8 @@ function gecmiseEkle(kayit) {
     const gecmis = gecmisiGetir();
     const puan = Math.max(kayit.abusePuan || 0, kayit.infoPuan || 0);
     
-    if (puan >= 21) kayit.seviye = "kritik";
-    else if (puan >= 15) kayit.seviye = "supheli";
+    if (puan >= getEsikKritik()) kayit.seviye = "kritik";
+    else if (puan >= getEsikSupheli()) kayit.seviye = "supheli";
     else kayit.seviye = "temiz";
     gecmis.push(kayit);
     const birHaftaOnce = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -210,6 +210,10 @@ async function sorgula() {
     });
 
     tabloOlustur(sonuclar);
+        const a = ayarlariGetir();
+    if (a.sesliUyari && sonuclar.some(v => abuseSusPuan(v) >= getEsikKritik() || infoSusPuan(v) >= getEsikKritik())) {
+        try { new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACAf39/f4B/f3+AgH9/f3+Af39/gIB/f3+AgH9/f3+Af39/gIB/f3+AgH9/f3+Af39/gIB/f39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gH9/f39/f4B/f39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gH9/f39/f4B/f39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gIA=").play().catch(()=>{}); } catch(e) {}
+    }
     btn.disabled = false;
     btn.textContent = "Sorgula";
     exportBtn.style.display = "block";
@@ -701,6 +705,52 @@ function hashTablosuOlustur(veriler) {
     html += "</table>";
     document.getElementById("hashSonuc").innerHTML = html;
         document.getElementById("hashVtDetayBtn").style.display = "block";
+}
+// Ayarlar
+function ayarlariGetir() {
+    return JSON.parse(localStorage.getItem("suzgec_ayarlar") || "{}");
+}
+function ayarKaydet() {
+    const ayarlar = {
+        sesliUyari: document.getElementById("sesliUyari")?.checked || false,
+        tarayiciBildirim: document.getElementById("tarayiciBildirim")?.checked || false,
+        esikSupheli: parseInt(document.getElementById("esikSupheli")?.value) || 15,
+        esikKritik: parseInt(document.getElementById("esikKritik")?.value) || 21,
+        tema: localStorage.getItem("suzgec_tema") || "dark"
+    };
+    localStorage.setItem("suzgec_ayarlar", JSON.stringify(ayarlar));
+}
+function ayarlariYukle() {
+    const a = ayarlariGetir();
+    if (document.getElementById("sesliUyari")) document.getElementById("sesliUyari").checked = a.sesliUyari || false;
+    if (document.getElementById("tarayiciBildirim")) document.getElementById("tarayiciBildirim").checked = a.tarayiciBildirim || false;
+    if (document.getElementById("esikSupheli")) document.getElementById("esikSupheli").value = a.esikSupheli || 15;
+    if (document.getElementById("esikKritik")) document.getElementById("esikKritik").value = a.esikKritik || 21;
+}
+
+function temaDegistir() {
+    const mevcut = localStorage.getItem("suzgec_tema") || "dark";
+    const yeni = mevcut === "dark" ? "light" : "dark";
+    localStorage.setItem("suzgec_tema", yeni);
+    document.body.classList.toggle("light-theme", yeni === "light");
+    const btn = document.getElementById("temaBtn");
+    if (btn) btn.textContent = yeni === "dark" ? "🌙 Karanlık" : "☀️ Aydınlık";
+}
+
+// Eşik değerlerini kullanan fonksiyonları güncelle
+function getEsikSupheli() {
+    return parseInt(ayarlariGetir().esikSupheli) || 15;
+}
+function getEsikKritik() {
+    return parseInt(ayarlariGetir().esikKritik) || 21;
+}
+
+// Sayfa yüklenince ayarları uygula
+ayarlariYukle();
+if (localStorage.getItem("suzgec_tema") === "light") {
+    document.body.classList.add("light-theme");
+    const temaBtn = document.getElementById("temaBtn");
+    if (temaBtn) temaBtn.textContent = "☀️ Aydınlık";
 }
 dashboardGuncelle();
 gecmisiGoster();

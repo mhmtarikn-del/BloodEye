@@ -33,7 +33,7 @@
                         <button class="menu-btn" onclick="sayfaGoster('hashdetector')">🔐 Hash Süzgeci</button>
                         <button class="menu-btn" onclick="sayfaGoster('tehdit')">📋 Tehdit Analizi</button>
            
-            <button class="menu-btn disabled">⚙️ Ayarlar</button>
+            <button class="menu-btn" onclick="sayfaGoster('ayarlar')">⚙️ Ayarlar</button>
             <div class="menu-footer">
                 <div class="versiyon">v1.01 BETA</div>
                 <div class="built-by">Builded by <span class="footer-name">M.Tarık</span></div>
@@ -166,6 +166,44 @@
                         <h3 style="color:#e94560; margin-top:30px;">🕐 Son 24 Saat Hash Geçmişi</h3>
                         <div id="hashGecmisTablo"></div>
                     </div>
+            </div>
+                        <!-- Ayarlar -->
+            <div id="sayfa-ayarlar" class="sayfa">
+                <div class="container" style="max-width:600px;">
+                    <h2 style="color:#b71c1c; margin-bottom:20px;">⚙️ Ayarlar</h2>
+                    
+                    <div class="ayar-kart">
+                        <h3>🔔 Bildirim Ayarları</h3>
+                        <div class="ayar-satir">
+                            <span>Sesli uyarı (kritik IP tespitinde)</span>
+                            <input type="checkbox" id="sesliUyari" onchange="ayarKaydet()">
+                        </div>
+                        <div class="ayar-satir">
+                            <span>Tarayıcı bildirimi</span>
+                            <input type="checkbox" id="tarayiciBildirim" onchange="ayarKaydet()">
+                        </div>
+                    </div>
+
+                    <div class="ayar-kart">
+                        <h3>🎨 Tema</h3>
+                        <div class="ayar-satir">
+                            <span>Karanlık / Aydınlık</span>
+                            <button id="temaBtn" onclick="temaDegistir()" style="width:auto; padding:8px 20px;">🌙 Karanlık</button>
+                        </div>
+                    </div>
+
+                    <div class="ayar-kart">
+                        <h3>⚠️ Risk Eşik Değerleri</h3>
+                        <div class="ayar-satir">
+                            <span>Şüpheli eşiği (≥)</span>
+                            <input type="number" id="esikSupheli" value="15" min="0" max="100" onchange="ayarKaydet()" style="width:70px;">
+                        </div>
+                        <div class="ayar-satir">
+                            <span>Kritik eşiği (≥)</span>
+                            <input type="number" id="esikKritik" value="21" min="0" max="100" onchange="ayarKaydet()" style="width:70px;">
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
