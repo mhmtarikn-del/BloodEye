@@ -467,7 +467,9 @@ async function tehditAnaliziGuncelle() {
         if (islenenIPler.has(k.ip)) continue;
         islenenIPler.add(k.ip);
         const cached = konumCache[k.ip], ulke = cached?.country || "??";
-        ulkeListe.push({ ip: k.ip, ulke, bayrak: ulkeKoduEmoji(ulke), adet: son7Kayit.filter(x => x.ip === k.ip && x.seviye === "kritik").length });
+        const ulkeKodu = cached?.country || "??";
+        const bayrak = ulkeKodu !== "??" ? ulkeKoduEmoji(ulkeKodu) + " " + ulkeKodu : "🏳️ ??";
+        ulkeListe.push({ ip: k.ip, ulke: ulkeKodu, bayrak, adet: son7Kayit.filter(x => x.ip === k.ip && x.seviye === "kritik").length });
     }
     const ulkeSirali = ulkeListe.sort((a,b) => b.adet - a.adet).slice(0, 5);
     let ulkeHtml = ulkeSirali.length === 0 ? '<p class="bos">Veri yok</p>' : ulkeSirali.map(u => `<div class="ulke-item"><span>${u.bayrak} ${u.ip}</span><span>${u.adet}x</span></div>`).join("");
