@@ -110,7 +110,18 @@ app.post("/sifirla", (req, res) => {
     veriYaz({ ip: [], hash: [], url: [] });
     res.json({ ok: true });
 });
-
+app.get("/gunluk-log/:tarih", (req, res) => {
+    const data = veriOku();
+    const tarih = req.params.tarih; // "2026-08-04" formatında
+    const gunBas = new Date(tarih).getTime();
+    const gunSon = gunBas + 24 * 60 * 60 * 1000;
+    
+    const ipLog = data.ip.filter(k => k.tarih >= gunBas && k.tarih < gunSon);
+    const hashLog = data.hash.filter(k => k.tarih >= gunBas && k.tarih < gunSon);
+    const urlLog = data.url.filter(k => k.tarih >= gunBas && k.tarih < gunSon);
+    
+    res.json({ ip: ipLog, hash: hashLog, url: urlLog });
+});
 app.get("/", (req, res) => {
     res.send("BloodEye Proxy - Running");
 });
