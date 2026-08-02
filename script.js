@@ -485,15 +485,17 @@ async function tehditAnaliziGuncelle() {
 }
 
 function pastaCiz(temiz, supheli, kritik, toplam) {
-      const dpr = window.devicePixelRatio || 1;
+    const canvas = document.getElementById("pastaChart");
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
     canvas.width = 200 * dpr;
     canvas.height = 200 * dpr;
     canvas.style.width = "200px";
     canvas.style.height = "200px";
+    const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
-    const canvas = document.getElementById("pastaChart"); if (!canvas) return;
-    const ctx = canvas.getContext("2d"), w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, r = 80;
-    ctx.clearRect(0,0,w,h);
+    const w = 200, h = 200, cx = w/2, cy = h/2, r = 80;
+    ctx.clearRect(0, 0, w, h);
     const veriler = [{ deger: temiz, renk: "#40e0d0", etiket: "Temiz" },{ deger: supheli, renk: "#ffaa00", etiket: "Şüpheli" },{ deger: kritik, renk: "#c62828", etiket: "Kritik" }];
     let baslangic = -Math.PI/2;
     veriler.forEach(v => { if(v.deger===0)return; const dilim=(v.deger/toplam)*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,baslangic,baslangic+dilim); ctx.fillStyle=v.renk; ctx.fill(); baslangic+=dilim; });
