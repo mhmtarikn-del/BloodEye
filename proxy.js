@@ -114,16 +114,18 @@ app.post("/sifirla", (req, res) => {
     veriYaz({ ip: [], hash: [], url: [] });
     res.json({ ok: true });
 });
-app.post("/gecmis/vt-guncelle", (req, res) => {
+app.post("/gecmis/vt-toplu-guncelle", (req, res) => {
     const data = veriOku();
-    const { ip, vtSonuc, vtDetay } = req.body;
-    for (let i = data.ip.length - 1; i >= 0; i--) {
-        if (data.ip[i].ip === ip) {
-            data.ip[i].vtSonuc = vtSonuc;
-            if (vtDetay) data.ip[i].vtDetay = vtDetay;
-            break;
+    const guncellemeler = req.body;
+    guncellemeler.forEach(g => {
+        for (let i = data.ip.length - 1; i >= 0; i--) {
+            if (data.ip[i].ip === g.ip) {
+                data.ip[i].vtSonuc = g.vtSonuc;
+                if (g.vtDetay) data.ip[i].vtDetay = g.vtDetay;
+                break;
+            }
         }
-    }
+    });
     veriYaz(data);
     res.json({ ok: true });
 });

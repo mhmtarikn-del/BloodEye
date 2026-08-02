@@ -384,7 +384,7 @@ function tabloOlustur(veriler) {
 async function vtOtomatikBaslat(veriler) {
     vtIptal = false;
     sorguAktif = true;
-        window.onbeforeunload = () => "VT taraması devam ediyor...";
+    window.onbeforeunload = () => "VT taraması devam ediyor...";
     const panel = document.getElementById("vtPanel");
     const durum = document.getElementById("vtDurum");
     const sonucDiv = document.getElementById("vtSonuc");
@@ -405,8 +405,8 @@ async function vtOtomatikBaslat(veriler) {
                 const mal = stats.malicious || 0;
                 const tot = Object.values(stats).reduce((a,b) => a+b, 0);
                 document.getElementById(`vt-${i}`).textContent = `${mal}/${tot}`;
-                                v.vtSonuc = `${mal}/${tot}`;                                
-                                v.vtDetay = { total: tot, malicious: mal, suspicious: stats.suspicious || 0, harmless: stats.harmless || 0, engines: Object.entries(res.data.attributes.last_analysis_results || {}).filter(([k,v]) => v.category === "malicious" || v.category === "suspicious").map(([k,v]) => ({ name: k, result: v.result, category: v.category })) };
+                v.vtSonuc = `${mal}/${tot}`;
+                v.vtDetay = { total: tot, malicious: mal, suspicious: stats.suspicious || 0, harmless: stats.harmless || 0, engines: Object.entries(res.data.attributes.last_analysis_results || {}).filter(([k,v]) => v.category === "malicious" || v.category === "suspicious").map(([k,v]) => ({ name: k, result: v.result, category: v.category })) };
                 if (mal > 0) {
                     document.getElementById(`vt-${i}`).style.color = "#c62828";
                     document.getElementById(`vt-${i}`).style.fontWeight = "bold";
@@ -414,31 +414,39 @@ async function vtOtomatikBaslat(veriler) {
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ⚠️`;
                 } else {
                     document.getElementById(`vt-${i}`).style.color = "#40e0d0";
-                                    v.vtSonuc = `${mal}/${tot}`;
+                    v.vtSonuc = `${mal}/${tot}`;
                     document.getElementById(sid).className = "vt-satir vt-temiz";
                     document.getElementById(sid).textContent = `${v.ip} → ${mal}/${tot} ✅`;
                 }
             }
         } catch(e) {
             document.getElementById(`vt-${i}`).textContent = "Hata";
-                                    v.vtSonuc = "Hata";
+            v.vtSonuc = "Hata";
             document.getElementById(sid).textContent = `${v.ip} → Hata`;
         }
-        // VT sonucunu hemen kaydet
-        try {
-            await fetch("https://bloodeye-proxy.onrender.com/gecmis/vt-guncelle", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ip: v.ip, vtSonuc: v.vtSonuc || "-", vtDetay: v.vtDetay || null })
-            });
-        } catch(e) {}
         gecmisiGoster();
-            window.onbeforeunload = null;
-        
         await new Promise(r => setTimeout(r, 15000));
     }
-    
+
+    // Tüm VT sonuçlarını toplu kaydet
+    const vtGuncellemeler = veriler.filter(v => v.vtSonuc).map(v => ({
+        ip: v.ip,
+        vtSonuc: v.vtSonuc,
+        vtDetay: v.vtDetay || null
+    }));
+    if (vtGuncellemeler.length > 0) {
+        try {
+            await fetch("https://bloodeye-proxy.onrender.com/gecmis/vt-toplu-guncelle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(vtGuncellemeler)
+            });
+        } catch(e) {}
+    }
+
     gecmisiGoster();
+    sorguAktif = false;
+    window.onbeforeunload = null;
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
 }
 
