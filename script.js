@@ -11,6 +11,7 @@ function sayfaGoster(sayfa) {
     event.target.classList.add("active");
     if (sayfa === "dashboard") dashboardGuncelle();
         if (sayfa === "hashdetector") setTimeout(() => hashGecmisiGoster(), 200);
+            if (sayfa === "urldetector") setTimeout(() => urlGecmisiGoster(), 200);
     if (sayfa === "tehdit") {
         setTimeout(() => {
             tehditAnaliziGuncelle();
@@ -389,8 +390,7 @@ function sifirlaPopup() {
     let h=`<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-reset" onclick="event.stopPropagation()"><h2>⚠️ Tüm Verileri Sıfırla</h2><p>Dashboard verileri ve tarama geçmişi kalıcı olarak silinecek.</p><div class="btn-group"><button class="btn-tamam" onclick="sifirlaOnay()">Tamam</button><button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button></div></div></div>`;
     document.body.insertAdjacentHTML("beforeend", h);
 }
-function sifirlaOnay() { localStorage.removeItem("bloodeye_gecmis"); localStorage.removeItem("bloodeye_konum"); localStorage.removeItem("bloodeye_hash_gecmis"); location.reload(); }
-
+function sifirlaOnay() { localStorage.removeItem("bloodeye_gecmis"); localStorage.removeItem("bloodeye_konum"); localStorage.removeItem("bloodeye_hash_gecmis"); localStorage.removeItem("suzgec_url_gecmis"); location.reload(); }
 function gecmisiGoster() {
     const gecmis=gecmisiGetir(), son24s=Date.now()-24*60*60*1000, sonKayitlar=gecmis.filter(k=>k.tarih>son24s).sort((a,b)=>b.tarih-a.tarih);
     const panel=document.getElementById("gecmisPanel"); if(!panel)return;
@@ -773,6 +773,125 @@ if (localStorage.getItem("suzgec_tema") === "light") {
 }
 if (Notification.permission === "default") {
     Notification.requestPermission();
+}
+// URL Süzgeci
+let urlSonVeriler = [];
+
+document.getElementById("urlSorguBtn")?.addEventListener("click", urlSorgula);
+
+async function urlSorgula() {
+    const input = document.getElementById("urlInput").value.trim();
+    const sonucDiv = document.getElementById("urlSonuc");
+    const btn = document.getElementById("urlSorguBtn");
+
+    if (!input) {
+        sonucDiv.innerHTML = '<p class="hata">Lütfen en az bir URL girin.</p>';
+        return;
+    }
+
+    const satirlar = input.split("\n").map(s => s.trim()).filter(s => s !== "");
+    const urlListesi = satirlar.map(s => {
+        if (!s.startsWith("http")) s = "https://" + s;
+        return s;
+    });
+
+    if (urlListesi.length === 0) {
+        sonucDiv.innerHTML = '<p class="hata">Geçerli URL bulunamadı.</p>';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Sorgulanıyor...";
+    document.getElementById("vtUrlPanel").style.display = "none";
+    sonucDiv.innerHTML = '<p class="loading">Virustotal URL sorgulanıyor...</p>';
+
+    const sonuclar = [];
+
+    for (let i = 0; i < urlListesi.length; i++) {
+        const url = urlListesi[i];
+        sonucDiv.innerHTML = `<p class="loading">Sorgulanıyor: ${i+1}/${urlListesi.length} - ${url.substring(0,50)}...</p>`;
+
+        try {
+            const res = await fetch(`https://bloodeye-proxy.onrender.com/vt-url?url=${encodeURIComponent(url)}`).then(r => r.json());
+            sonuclar.push({ url, data: res });
+        } catch(e) {
+            sonuclar.push({ url, data: null });
+        }
+
+        await new Promise(r => setTimeout(r, 15000));
+    }
+
+    urlSonVeriler = sonuclar;
+    urlTablosuOlustur(sonuclar);
+    urlGecmiseEkle(sonuclar);
+    urlGecmisiGoster();
+    btn.disabled = false;
+    btn.textContent = "URL Sorgula";
+}
+
+function urlTablosuOlustur(veriler) {
+    let html = "<table><tr><th>URL</th><th>Zararlı</th><th>Temiz</th><th>Son Tarama</th></tr>";
+
+    veriler.forEach(v => {
+        const d = v.data;
+        let mal = "-", temiz = "-", tarih = "-";
+        const kisaUrl = v.url.length > 60 ? v.url.substring(0,57) + "..." : v.url;
+
+        if (d && d.data) {
+            const stats = d.data.attributes.last_analysis_stats || {};
+            mal = stats.malicious || 0;
+            temiz = stats.harmless || 0;
+            if (d.data.attributes.last_analysis_date) {
+                tarih = new Date(d.data.attributes.last_analysis_date * 1000).toLocaleString("tr-TR");
+            }
+        } else if (d && d.error) {
+            mal = "Hata";
+        }
+
+        const malRengi = mal > 0 ? 'style="color:#c62828;font-weight:bold;"' : 'style="color:#40e0d0;"';
+        html += `<tr><td title="${v.url}">${kisaUrl}</td><td ${malRengi}>${mal}</td><td style="color:#40e0d0;">${temiz}</td><td>${tarih}</td></tr>`;
+    });
+
+    html += "</table>";
+    document.getElementById("urlSonuc").innerHTML = html;
+}
+
+function urlGecmisiGetir() {
+    return JSON.parse(localStorage.getItem("suzgec_url_gecmis") || "[]");
+}
+
+function urlGecmiseEkle(sonuclar) {
+    const gecmis = urlGecmisiGetir();
+    const simdi = Date.now();
+    sonuclar.forEach(v => {
+        gecmis.push({
+            url: v.url,
+            tarih: simdi,
+            malicious: v.data?.data?.attributes?.last_analysis_stats?.malicious || 0,
+            harmless: v.data?.data?.attributes?.last_analysis_stats?.harmless || 0
+        });
+    });
+    const son24s = simdi - 24 * 60 * 60 * 1000;
+    localStorage.setItem("suzgec_url_gecmis", JSON.stringify(gecmis.filter(k => k.tarih > son24s)));
+}
+
+function urlGecmisiGoster() {
+    const gecmis = urlGecmisiGetir();
+    const panel = document.getElementById("urlGecmisPanel");
+    if (!panel) return;
+    if (gecmis.length === 0) { panel.style.display = "none"; return; }
+    panel.style.display = "block";
+
+    const sirali = gecmis.sort((a,b) => b.tarih - a.tarih);
+    let html = "<table><tr><th>URL</th><th>Tarih</th><th>Zararlı</th><th>Temiz</th></tr>";
+    sirali.forEach(k => {
+        const tarih = new Date(k.tarih).toLocaleString("tr-TR");
+        const kisa = k.url.length > 60 ? k.url.substring(0,57) + "..." : k.url;
+        const renk = k.malicious > 0 ? 'color:#c62828;font-weight:bold;' : 'color:#40e0d0;';
+        html += `<tr><td title="${k.url}">${kisa}</td><td>${tarih}</td><td style="${renk}">${k.malicious}</td><td style="color:#40e0d0;">${k.harmless}</td></tr>`;
+    });
+    html += "</table>";
+    document.getElementById("urlGecmisTablo").innerHTML = html;
 }
 dashboardGuncelle();
 gecmisiGoster();

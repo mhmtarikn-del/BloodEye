@@ -59,3 +59,15 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Proxy running on port " + PORT));
+app.get("/vt-url", async (req, res) => {
+    const url = req.query.url;
+    if (!url) return res.status(400).json({ error: "url gerekli" });
+    try {
+        const urlId = Buffer.from(url).toString("base64url");
+        const response = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
+            headers: { "x-apikey": VT_TOKEN, "Accept": "application/json" }
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch(e) { res.status(500).json({ error: e.message }); }
+});
