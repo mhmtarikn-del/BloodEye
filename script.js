@@ -389,7 +389,7 @@ function sifirlaPopup() {
     let h=`<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-reset" onclick="event.stopPropagation()"><h2>⚠️ Tüm Verileri Sıfırla</h2><p>Dashboard verileri ve tarama geçmişi kalıcı olarak silinecek.</p><div class="btn-group"><button class="btn-tamam" onclick="sifirlaOnay()">Tamam</button><button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button></div></div></div>`;
     document.body.insertAdjacentHTML("beforeend", h);
 }
-function sifirlaOnay() { localStorage.removeItem("bloodeye_gecmis"); localStorage.removeItem("bloodeye_konum"); location.reload(); }
+function sifirlaOnay() { localStorage.removeItem("bloodeye_gecmis"); localStorage.removeItem("bloodeye_konum"); localStorage.removeItem("bloodeye_hash_gecmis"); location.reload(); }
 
 function gecmisiGoster() {
     const gecmis=gecmisiGetir(), son24s=Date.now()-24*60*60*1000, sonKayitlar=gecmis.filter(k=>k.tarih>son24s).sort((a,b)=>b.tarih-a.tarih);
