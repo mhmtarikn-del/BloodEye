@@ -88,14 +88,14 @@ async function dashboardGuncelle() {
 
     aylikGrafikCiz(gecmis);
         // Hash gauge
-    const hashGecmis = JSON.parse(localStorage.getItem("bloodeye_hash_gecmis") || "[]");
+    const hashGecmis = await hashGecmisiGetir();
     const hash24 = hashGecmis.filter(k => k.tarih > son24s);
     const hashKritik = hash24.filter(k => k.malicious > 0).length;
     const hashOran = hash24.length > 0 ? Math.round((hashKritik / hash24.length) * 100) : 0;
     gaugeCiz(hashOran, "gaugeHash");
 
     // URL gauge
-    const urlGecmis = JSON.parse(localStorage.getItem("suzgec_url_gecmis") || "[]");
+        const urlGecmis = await urlGecmisiGetir();
     const url24 = urlGecmis.filter(k => k.tarih > son24s);
     const urlKritik = url24.filter(k => k.malicious > 0).length;
     const urlOran = url24.length > 0 ? Math.round((urlKritik / url24.length) * 100) : 0;
