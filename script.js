@@ -4,7 +4,6 @@ let sorguAktif = false;
 window.addEventListener("beforeunload", (e) => {
     if (sorguAktif) {
         e.preventDefault();
-        e.returnValue = "";
     }
 });
 let vtHamVeriler = [];
