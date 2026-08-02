@@ -84,7 +84,7 @@ function aylikGrafikCiz(gecmis) {
     const gunler = [];
     for (let i = 29; i >= 0; i--) {
         const gun = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-        gunler.push(gun.getDate() + " " + gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase());
+        gunler.push({ tarih: gun.getDate() + " " + gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase(), tam: gun.toLocaleDateString("tr-TR") });
     }
 
     const veri = new Array(30).fill(0);
@@ -102,72 +102,27 @@ function aylikGrafikCiz(gecmis) {
     });
 
     const max = Math.max(...veri, 1);
-    const canvas = document.getElementById("chartHaftalik");
-    if (!canvas) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const genislik = 2200;
-    canvas.style.width = genislik + "px";
-    canvas.style.height = "200px";
-    canvas.width = genislik * dpr;
-    canvas.height = 200 * dpr;
-
-    const ctx = canvas.getContext("2d");
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, genislik, 200);
-
-    const barWidth = Math.max(6, (genislik - 60) / 90);
-    const gap = 2;
-
-    let tooltipDiv = document.getElementById("chartTooltip");
-    if (!tooltipDiv) {
-        tooltipDiv = document.createElement("div");
-        tooltipDiv.id = "chartTooltip";
-        tooltipDiv.style.cssText = "position:absolute;background:#0d1730;border:1px solid #c62828;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;display:none;z-index:100;white-space:nowrap;";
-        canvas.parentElement.appendChild(tooltipDiv);
-    }
-
-    canvas.onmousemove = function(e) {
-        const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        const containerRect = canvas.parentElement.getBoundingClientRect();
-        let found = false;
-        for (let i = 0; i < 30; i++) {
-            const x = i * (barWidth * 3 + gap) + 30;
-            if (mx >= x && mx <= x + barWidth * 3) {
-                tooltipDiv.style.display = "block";
-                tooltipDiv.style.left = (rect.left + x + barWidth * 1.5) + "px";
-                tooltipDiv.style.top = (rect.top + my - 60) + "px";
-                tooltipDiv.innerHTML = `<b>${gunler[i]}</b><br><span style="color:#40e0d0;">● Temiz: ${veri[i] - supheliVeri[i] - kritikVeri[i]}</span><br><span style="color:#ffaa00;">● Şüpheli: ${supheliVeri[i]}</span><br><span style="color:#c62828;">● Kritik: ${kritikVeri[i]}</span>`;
-                found = true;
-                break;
-            }
-        }
-        if (!found) tooltipDiv.style.display = "none";
-    };
-    canvas.onmouseleave = function() { tooltipDiv.style.display = "none"; };
+    const container = document.getElementById("chartHaftalik").parentElement;
+    let html = '<div style="display:flex; align-items:flex-end; gap:2px; height:180px; min-width:1000px;">';
 
     for (let i = 0; i < 30; i++) {
-        const x = i * (barWidth * 3 + gap) + 30;
-        const temizH = ((veri[i] - supheliVeri[i] - kritikVeri[i]) / max) * 140;
-        const supheliH = (supheliVeri[i] / max) * 140;
-        const kritikH = (kritikVeri[i] / max) * 140;
+        const temiz = veri[i] - supheliVeri[i] - kritikVeri[i];
+        const supH = (supheliVeri[i] / max) * 140;
+        const kriH = (kritikVeri[i] / max) * 140;
+        const temH = (temiz / max) * 140;
 
-        ctx.fillStyle = "#40e0d0";
-        ctx.fillRect(x, 150 - temizH, barWidth, temizH);
-        ctx.fillStyle = "#ffaa00";
-        ctx.fillRect(x + barWidth + 1, 150 - supheliH, barWidth, supheliH);
-        ctx.fillStyle = "#c62828";
-        ctx.fillRect(x + (barWidth + 1) * 2, 150 - kritikH, barWidth, kritikH);
-
-        if (i % 3 === 0) {
-            ctx.fillStyle = "#aaa";
-            ctx.font = "9px Segoe UI";
-            ctx.textAlign = "center";
-            ctx.fillText(gunler[i], x + barWidth * 1.5, 170);
-        }
+        html += `<div style="display:flex; flex-direction:column; align-items:center; gap:1px;" title="${gunler[i].tam} - Temiz:${temiz} Şüpheli:${supheliVeri[i]} Kritik:${kritikVeri[i]}">`;
+        html += `<div style="display:flex; gap:1px; align-items:flex-end; height:150px;">`;
+        if (temH > 0) html += `<div style="width:10px;height:${temH}px;background:#40e0d0;border-radius:2px 2px 0 0;"></div>`;
+        if (supH > 0) html += `<div style="width:10px;height:${supH}px;background:#ffaa00;border-radius:2px 2px 0 0;"></div>`;
+        if (kriH > 0) html += `<div style="width:10px;height:${kriH}px;background:#c62828;border-radius:2px 2px 0 0;"></div>`;
+        html += `</div>`;
+        if (i % 3 === 0) html += `<span style="font-size:8px;color:#aaa;">${gunler[i].tarih}</span>`;
+        html += `</div>`;
     }
+
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 // IP Dedektörü
