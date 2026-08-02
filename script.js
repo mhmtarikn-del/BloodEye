@@ -129,7 +129,7 @@ function aylikGrafikCiz(gecmis) {
 
     const max = Math.max(...veri, 5); // Grafik tavanını normalize etmek için min max 5
     const container = document.getElementById("chartHaftalik");
-    
+        if (!container) return;
     let html = '<div class="chart-30-container">';
 
     for (let i = 29; i >= 0; i--) {
