@@ -21,28 +21,29 @@ function sayfaGoster(sayfa) {
 }
 
 // localStorage
-function gecmisiGetir() {
-    const ham = JSON.parse(localStorage.getItem("bloodeye_gecmis") || "[]");
-    const temiz = ham.filter(k => k.seviye && k.tarih);
-    if (temiz.length !== ham.length) localStorage.setItem("bloodeye_gecmis", JSON.stringify(temiz));
-    return temiz;
+async function gecmisiGetir() {
+    try {
+        const res = await fetch("https://bloodeye-proxy.onrender.com/gecmis/ip");
+        return await res.json();
+    } catch(e) { return []; }
 }
-function gecmiseEkle(kayit) {
-    const gecmis = gecmisiGetir();
+async function gecmiseEkle(kayit) {
     const puan = Math.max(kayit.abusePuan || 0, kayit.infoPuan || 0);
-    
     if (puan >= getEsikKritik()) kayit.seviye = "kritik";
     else if (puan >= getEsikSupheli()) kayit.seviye = "supheli";
     else kayit.seviye = "temiz";
-    gecmis.push(kayit);
-    const birHaftaOnce = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const filtrelenmis = gecmis.filter(k => k.tarih > birHaftaOnce);
-    localStorage.setItem("bloodeye_gecmis", JSON.stringify(filtrelenmis));
+    try {
+        await fetch("https://bloodeye-proxy.onrender.com/gecmis/ip", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify([kayit])
+        });
+    } catch(e) {}
 }
 
 // Dashboard
-function dashboardGuncelle() {
-    const gecmis = gecmisiGetir();
+async function dashboardGuncelle() {
+    const gecmis = await gecmisiGetir();
     const simdi = Date.now();
     const son24s = simdi - 24 * 60 * 60 * 1000;
 
@@ -191,7 +192,7 @@ async function sorgula() {
         return;
     }
 
-    const gecmisData = gecmisiGetir();
+    const gecmisData = await gecmisiGetir();
     const son24s = Date.now() - 24 * 60 * 60 * 1000;
     const son24IPler = new Set(gecmisData.filter(k => k.tarih > son24s).map(k => k.ip));
     const filtrelenmisIP = benzersizIP.filter(ip => !son24IPler.has(ip));
@@ -326,7 +327,7 @@ async function vtOtomatikBaslat(veriler) {
             document.getElementById(sid).textContent = `${v.ip} → Hata`;
         }
         // VT sonucunu hemen kaydet
-        const gecmis = gecmisiGetir();
+        const gecmis = await gecmisiGetir();
         for (let j = gecmis.length - 1; j >= 0; j--) {
             if (gecmis[j].ip === v.ip) {
                 gecmis[j].vtSonuc = v.vtSonuc || "-";
@@ -340,7 +341,7 @@ async function vtOtomatikBaslat(veriler) {
     }
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
            // VT sonuçlarını localStorage'a kaydet
-    //const gecmis = gecmisiGetir();
+    //const gecmis = await gecmisiGetir();
     //console.log("VT bitti, güncelleme başlıyor. veriler:", veriler.length);
     //for (let i = 0; i < veriler.length; i++) {
     //    const v = veriler[i];
@@ -408,12 +409,23 @@ function exportCSV() {
 function kopyala(id) { const t=document.getElementById(id); t.select(); t.setSelectionRange(0,99999); navigator.clipboard.writeText(t.value); const btn=t.parentElement.querySelector(".copyBtn"); btn.textContent="✅"; setTimeout(()=>{btn.textContent="📋";},1500); }
 
 function sifirlaPopup() {
-    let h=`<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-reset" onclick="event.stopPropagation()"><h2>⚠️ Tüm Verileri Sıfırla</h2><p>Dashboard verileri ve tarama geçmişi kalıcı olarak silinecek.</p><div class="btn-group"><button class="btn-tamam" onclick="sifirlaOnay()">Tamam</button><button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button></div></div></div>`;
+    let h=`<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-reset" onclick="event.stopPropagation()"><h2>⚠️ Tüm Verileri Sıfırla</h2><p>Dashboard verileri kalıcı olarak silinecek.</p><input type="password" id="sifreInput" placeholder="Admin şifresi" style="width:100%;padding:8px;margin-bottom:15px;background:#16213e;color:#eee;border:1px solid #0f3460;border-radius:4px;"><div class="btn-group"><button class="btn-tamam" onclick="sifirlaOnay()">Tamam</button><button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button></div></div></div>`;
     document.body.insertAdjacentHTML("beforeend", h);
 }
-function sifirlaOnay() { localStorage.removeItem("bloodeye_gecmis"); localStorage.removeItem("bloodeye_konum"); localStorage.removeItem("bloodeye_hash_gecmis"); localStorage.removeItem("suzgec_url_gecmis"); location.reload(); }
-function gecmisiGoster() {
-    const gecmis=gecmisiGetir(), son24s=Date.now()-24*60*60*1000, sonKayitlar=gecmis.filter(k=>k.tarih>son24s).sort((a,b)=>b.tarih-a.tarih);
+async function sifirlaOnay() {
+    const sifre = document.getElementById("sifreInput").value;
+    try {
+        const res = await fetch("https://bloodeye-proxy.onrender.com/sifirla", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sifre })
+        });
+        if (res.ok) { location.reload(); }
+        else { alert("Yetkisiz!"); }
+    } catch(e) { alert("Bağlantı hatası!"); }
+}
+async function gecmisiGoster() {
+    const gecmis=await gecmisiGetir(), son24s=Date.now()-24*60*60*1000, sonKayitlar=gecmis.filter(k=>k.tarih>son24s).sort((a,b)=>b.tarih-a.tarih);
     const panel=document.getElementById("gecmisPanel"); if(!panel)return;
     if(sonKayitlar.length===0){panel.style.display="none";return;}
     panel.style.display="block";
@@ -476,7 +488,7 @@ function gaugeCiz(oran, canvasId) {
 
 // Tehdit Analizi
 async function tehditAnaliziGuncelle() {
-    const gecmis = gecmisiGetir();
+    const gecmis = await gecmisiGetir();
     const simdi = Date.now();
     const son7Gun = simdi - 7 * 24 * 60 * 60 * 1000;
     const son1Saat = simdi - 60 * 60 * 1000;
@@ -637,29 +649,33 @@ async function hashSorgula() {
     btn.disabled = false;
     btn.textContent = "Hash Sorgula";
 }
-function hashGecmisiGetir() {
-    return JSON.parse(localStorage.getItem("bloodeye_hash_gecmis") || "[]");
+async function hashGecmisiGetir() { 
+    try {
+        const res = await fetch("https://bloodeye-proxy.onrender.com/gecmis/hash");
+        return await res.json();
+    } catch(e) { return []; }
 }
 
-function hashGecmiseEkle(sonuclar) {
-    const gecmis = hashGecmisiGetir();
+async function hashGecmiseEkle(sonuclar) {
     const simdi = Date.now();
-    sonuclar.forEach(v => {
-        gecmis.push({
-            hash: v.hash,
-            tarih: simdi,
-            malicious: v.data?.data?.attributes?.last_analysis_stats?.malicious || 0,
-            harmless: v.data?.data?.attributes?.last_analysis_stats?.harmless || 0,
-            name: v.data?.data?.attributes?.meaningful_name || "-"
+    const kayitlar = sonuclar.map(v => ({
+        hash: v.hash,
+        tarih: simdi,
+        malicious: v.data?.data?.attributes?.last_analysis_stats?.malicious || 0,
+        harmless: v.data?.data?.attributes?.last_analysis_stats?.harmless || 0,
+        name: v.data?.data?.attributes?.meaningful_name || "-"
+    }));
+    try {
+        await fetch("https://bloodeye-proxy.onrender.com/gecmis/hash", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(kayitlar)
         });
-    });
-    const son24s = simdi - 24 * 60 * 60 * 1000;
-    const filtrelenmis = gecmis.filter(k => k.tarih > son24s);
-    localStorage.setItem("bloodeye_hash_gecmis", JSON.stringify(filtrelenmis));
+    } catch(e) {}
 }
 
-function hashGecmisiGoster() {
-    const gecmis = hashGecmisiGetir();
+async function hashGecmisiGoster() { 
+    const gecmis = await hashGecmisiGetir();
     const panel = document.getElementById("hashGecmisPanel");
     if (!panel) return;
     if (gecmis.length === 0) { panel.style.display = "none"; return; }
@@ -877,27 +893,32 @@ function urlTablosuOlustur(veriler) {
     document.getElementById("urlSonuc").innerHTML = html;
 }
 
-function urlGecmisiGetir() {
-    return JSON.parse(localStorage.getItem("suzgec_url_gecmis") || "[]");
+async function urlGecmisiGetir() { 
+    try {
+        const res = await fetch("https://bloodeye-proxy.onrender.com/gecmis/url");
+        return await res.json();
+    } catch(e) { return []; }
 }
 
-function urlGecmiseEkle(sonuclar) {
-    const gecmis = urlGecmisiGetir();
+async function urlGecmiseEkle(sonuclar) {
     const simdi = Date.now();
-    sonuclar.forEach(v => {
-        gecmis.push({
-            url: v.url,
-            tarih: simdi,
-            malicious: v.data?.data?.attributes?.last_analysis_stats?.malicious || 0,
-            harmless: v.data?.data?.attributes?.last_analysis_stats?.harmless || 0
+    const kayitlar = sonuclar.map(v => ({
+        url: v.url,
+        tarih: simdi,
+        malicious: v.data?.data?.attributes?.last_analysis_stats?.malicious || 0,
+        harmless: v.data?.data?.attributes?.last_analysis_stats?.harmless || 0
+    }));
+    try {
+        await fetch("https://bloodeye-proxy.onrender.com/gecmis/url", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(kayitlar)
         });
-    });
-    const son24s = simdi - 24 * 60 * 60 * 1000;
-    localStorage.setItem("suzgec_url_gecmis", JSON.stringify(gecmis.filter(k => k.tarih > son24s)));
+    } catch(e) {}
 }
 
-function urlGecmisiGoster() {
-    const gecmis = urlGecmisiGetir();
+async function urlGecmisiGoster() { 
+    const gecmis = await urlGecmisiGetir();
     const panel = document.getElementById("urlGecmisPanel");
     if (!panel) return;
     if (gecmis.length === 0) { panel.style.display = "none"; return; }
@@ -915,14 +936,13 @@ function urlGecmisiGoster() {
     document.getElementById("urlGecmisTablo").innerHTML = html;
 }
 dashboardGuncelle();
+urlGecmisiGoster();
 gecmisiGoster();
 hashGecmisiGoster();
-window.addEventListener("resize", () => {
-    const gecmis = gecmisiGetir();
+window.addEventListener("resize", async () => {
+const gecmis = await gecmisiGetir();
     if (gecmis.length > 0 && document.getElementById("chartHaftalik")) {
         aylikGrafikCiz(gecmis);
     }
     if (haritaObj) haritaObj.invalidateSize();
 });
-
-    

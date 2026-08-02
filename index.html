@@ -37,7 +37,7 @@
             <button class="menu-btn" onclick="sayfaGoster('ayarlar')">⚙️ Ayarlar</button>
             
             <div class="menu-footer">
-                <div class="versiyon">v1.08 BETA</div>
+                <div class="versiyon">v1.00</div>
                 <div class="built-by">Builded by <span class="footer-name">M.Tarık</span></div>
             </div>
         </nav>
@@ -58,11 +58,21 @@
                             <span><span class="legend-dot" style="background:#c62828;;"></span> Kritik</span>
                         </div>
                     </div>
-                    <div class="db-card">
+                    <div class="db-card db-genis">
                         <h3>⚠️ Saldırı Seviyesi (24s)</h3>
-                        <div class="risk-gauge">
-                            <canvas id="gaugeCanvas" width="200" height="140"></canvas>
-                            <p id="gaugeDetay">0/0 IP</p>
+                        <div style="display:flex; justify-content:space-around; gap:10px;">
+                            <div class="risk-gauge">
+                                <canvas id="gaugeIP" width="150" height="110"></canvas>
+                                <p style="font-size:11px;color:#aaa;">IP</p>
+                            </div>
+                            <div class="risk-gauge">
+                                <canvas id="gaugeHash" width="150" height="110"></canvas>
+                                <p style="font-size:11px;color:#aaa;">Hash</p>
+                            </div>
+                            <div class="risk-gauge">
+                                <canvas id="gaugeURL" width="150" height="110"></canvas>
+                                <p style="font-size:11px;color:#aaa;">URL</p>
+                            </div>
                         </div>
                     </div>
                                         <div class="db-card">
