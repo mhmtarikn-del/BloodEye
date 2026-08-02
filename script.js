@@ -721,3 +721,10 @@ function hashTablosuOlustur(veriler) {
 dashboardGuncelle();
 gecmisiGoster();
 hashGecmisiGoster();
+window.addEventListener("resize", () => {
+    const gecmis = gecmisiGetir();
+    if (gecmis.length > 0 && document.getElementById("chartHaftalik")) {
+        haftalikGrafikCiz(gecmis);
+    }
+    if (haritaObj) haritaObj.invalidateSize();
+});
