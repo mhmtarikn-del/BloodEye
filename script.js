@@ -459,6 +459,8 @@ async function vtOtomatikBaslat(veriler) {
     sorguAktif = false;
     window.onbeforeunload = null;
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
+        await dashboardGuncelle();
+    gecmisiGoster();
         dashboardGuncelle();
 }
 

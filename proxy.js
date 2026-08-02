@@ -95,36 +95,25 @@ app.post("/gecmis/:tip", (req, res) => {
     } else {
         data[tip].push(req.body);
     }
-    const birHaftaOnce = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    data[tip] = data[tip].filter(k => k.tarih > birHaftaOnce);
+    const otuzGunOnce = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    data[tip] = data[tip].filter(k => k.tarih > otuzGunOnce);
     veriYaz(data);
     res.json({ ok: true });
 });
 
-app.post("/login", (req, res) => {
-    if (req.body.sifre === ADMIN_SIFRE) {
-        res.json({ admin: true });
-    } else {
-        res.json({ admin: false });
-    }
-});
-
-app.post("/sifirla", (req, res) => {
-    if (req.body.sifre !== ADMIN_SIFRE) return res.status(403).json({ error: "Yetkisiz" });
-    veriYaz({ ip: [], hash: [], url: [] });
-    res.json({ ok: true });
-});
 app.post("/gecmis/vt-toplu-guncelle", (req, res) => {
     const data = veriOku();
-    const guncellemeler = req.body;
+    if (!data.ip) data.ip = [];
+    const guncellemeler = req.body || [];
     
     guncellemeler.forEach(g => {
-        // En son yapılan sorguyu bulup vtSonuc ve vtDetay verilerini kesin olarak işliyoruz
-        const index = data.ip.findLastIndex(item => item.ip === g.ip);
-        if (index !== -1) {
-            data.ip[index].vtSonuc = g.vtSonuc;
-            if (g.vtDetay) {
-                data.ip[index].vtDetay = g.vtDetay;
+        for (let i = data.ip.length - 1; i >= 0; i--) {
+            if (data.ip[i].ip === g.ip) {
+                data.ip[i].vtSonuc = g.vtSonuc;
+                if (g.vtDetay) {
+                    data.ip[i].vtDetay = g.vtDetay;
+                }
+                break;
             }
         }
     });
@@ -135,26 +124,15 @@ app.post("/gecmis/vt-toplu-guncelle", (req, res) => {
 
 app.get("/gunluk-log/:tarih", (req, res) => {
     const data = veriOku();
-    const hedefTarihStr = req.params.tarih; // Örn: "2026-08-03"
-
-    // Timezone sorunu yaşamamak için timestamp'i YYYY-MM-DD formatına çevirip kıyaslıyoruz
-    const isSameDay = (timestamp) => {
-        const d = new Date(timestamp);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const dd = String(d.getDate()).padStart(2, "0");
-        return `${yyyy}-${mm}-${dd}` === hedefTarihStr;
-    };
-
-    const ipLog = (data.ip || []).filter(k => isSameDay(k.tarih));
-    const hashLog = (data.hash || []).filter(k => isSameDay(k.tarih));
-    const urlLog = (data.url || []).filter(k => isSameDay(k.tarih));
+    const tarihStr = req.params.tarih; // Örn: "2026-08-03"
+    
+    // Türkiye saatiyle (+03:00) 00:00:00 ve 23:59:59 aralığı hesaplanır
+    const gunBas = new Date(`${tarihStr}T00:00:00+03:00`).getTime();
+    const gunSon = gunBas + (24 * 60 * 60 * 1000);
+    
+    const ipLog = (data.ip || []).filter(k => k.tarih >= gunBas && k.tarih < gunSon);
+    const hashLog = (data.hash || []).filter(k => k.tarih >= gunBas && k.tarih < gunSon);
+    const urlLog = (data.url || []).filter(k => k.tarih >= gunBas && k.tarih < gunSon);
     
     res.json({ ip: ipLog, hash: hashLog, url: urlLog });
 });
-app.get("/", (req, res) => {
-    res.send("BloodEye Proxy - Running");
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Proxy running on port " + PORT));
