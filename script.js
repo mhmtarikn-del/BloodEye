@@ -142,7 +142,7 @@ function aylikGrafikCiz(gecmis) {
         const tooltip = `${gunler[i].tam}&#10;🟢 Temiz: ${temiz}&#10;🟠 Şüpheli: ${supheliVeri[i]}&#10;🔴 Kritik: ${kritikVeri[i]}`;
 
         html += `
-            <div class="chart-col" title="${tooltip}">
+            <div class="chart-col" title="${tooltip}" onclick="gunlukDetayGoster('${gunler[i].tam}')" style="cursor:pointer;">
                 <div class="bars-track">
                     <div class="bar bar-temiz" style="height:${temH}px; opacity:${temiz > 0 ? '1' : '0.15'};"></div>
                     <div class="bar bar-supheli" style="height:${supH}px; opacity:${supheliVeri[i] > 0 ? '1' : '0.15'};"></div>
@@ -172,7 +172,71 @@ html += '</div>';
             const chartEl = document.getElementById("chartHaftalik");
     if (chartEl) chartEl.scrollLeft = 9999;
 }
+async function gunlukDetayGoster(tarihStr) {
+    const parts = tarihStr.split(".");
+    const tarih = `${parts[2]}-${parts[1].padStart(2,"0")}-${parts[0].padStart(2,"0")}`;
+    
+    try {
+        const res = await fetch(`https://bloodeye-proxy.onrender.com/gunluk-log/${tarih}`);
+        const data = await res.json();
+        
+        document.getElementById("gunlukDetayBaslik").textContent = `📅 ${tarihStr}`;
+        
+        let html = "";
+        
+        // IP Tablosu
+        html += `<h3>🔍 IP Taramaları <button class="copyBtn" onclick="gunlukIPKopyala()" style="width:auto;font-size:11px;">📋 IP Kopyala</button></h3>`;
+        html += `<div id="gunlukIPData" style="display:none;">${data.ip.map(k => k.ip).join("\n")}</div>`;
+        if (data.ip.length === 0) {
+            html += `<p class="bos">IP taranmamıştır</p>`;
+        } else {
+            html += `<table><tr><th>IP</th><th>Saat</th><th>Durum</th><th>Abuse</th><th>ipinfo</th></tr>`;
+            data.ip.forEach(k => {
+                const saat = new Date(k.tarih).toLocaleTimeString("tr-TR");
+                const durum = k.seviye === "kritik" ? "🔴 Kritik" : k.seviye === "supheli" ? "🟠 Şüpheli" : "🟢 Temiz";
+                html += `<tr><td>${k.ip}</td><td>${saat}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td></tr>`;
+            });
+            html += `</table>`;
+        }
+        
+        // Hash Tablosu
+        html += `<h3 style="margin-top:20px;">🔐 Hash Taramaları</h3>`;
+        if (data.hash.length === 0) {
+            html += `<p class="bos">Hash taranmamıştır</p>`;
+        } else {
+            html += `<table><tr><th>Hash</th><th>Saat</th><th>Zararlı</th><th>Temiz</th></tr>`;
+            data.hash.forEach(k => {
+                const saat = new Date(k.tarih).toLocaleTimeString("tr-TR");
+                const kisa = k.hash.length > 20 ? k.hash.substring(0,8)+"..."+k.hash.substring(k.hash.length-8) : k.hash;
+                html += `<tr><td title="${k.hash}">${kisa}</td><td>${saat}</td><td>${k.malicious||0}</td><td>${k.harmless||0}</td></tr>`;
+            });
+            html += `</table>`;
+        }
+        
+        // URL Tablosu
+        html += `<h3 style="margin-top:20px;">🌐 URL Taramaları</h3>`;
+        if (data.url.length === 0) {
+            html += `<p class="bos">URL taranmamıştır</p>`;
+        } else {
+            html += `<table><tr><th>URL</th><th>Saat</th><th>Zararlı</th><th>Temiz</th></tr>`;
+            data.url.forEach(k => {
+                const saat = new Date(k.tarih).toLocaleTimeString("tr-TR");
+                const kisa = k.url.length > 50 ? k.url.substring(0,47)+"..." : k.url;
+                html += `<tr><td title="${k.url}">${kisa}</td><td>${saat}</td><td>${k.malicious||0}</td><td>${k.harmless||0}</td></tr>`;
+            });
+            html += `</table>`;
+        }
+        
+        document.getElementById("gunlukDetayIcerik").innerHTML = html;
+        document.getElementById("gunlukDetayPopup").style.display = "flex";
+    } catch(e) {}
+}
 
+function gunlukIPKopyala() {
+    const data = document.getElementById("gunlukIPData").textContent;
+    navigator.clipboard.writeText(data);
+    alert("IP'ler kopyalandı!");
+}
 // IP Dedektörü
 document.getElementById("sorguBtn").addEventListener("click", sorgula);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);

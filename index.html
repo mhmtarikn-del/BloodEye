@@ -244,5 +244,12 @@
     </div>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
+        <div id="gunlukDetayPopup" class="popup-overlay" style="display:none;" onclick="this.style.display='none'">
+        <div class="popup popup-vt" onclick="event.stopPropagation()" style="max-width:95%;">
+            <h2 id="gunlukDetayBaslik"></h2>
+            <button class="popup-close" onclick="document.getElementById('gunlukDetayPopup').style.display='none'">✕</button>
+            <div id="gunlukDetayIcerik"></div>
+        </div>
+    </div>
 </body>
 </html>
