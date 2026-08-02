@@ -71,3 +71,37 @@ app.get("/vt-url", async (req, res) => {
         res.json(data);
     } catch(e) { res.status(500).json({ error: e.message }); }
 });
+const fs = require("fs");
+const path = require("path");
+const DATA_FILE = path.join(__dirname, "gecmis.json");
+
+function veriOku() {
+    try { return JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); } catch(e) { return { ip: [], hash: [], url: [] }; }
+}
+function veriYaz(data) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data));
+}
+
+app.use(express.json());
+
+app.get("/gecmis/:tip", (req, res) => {
+    const data = veriOku();
+    res.json(data[req.params.tip] || []);
+});
+
+app.post("/gecmis/:tip", (req, res) => {
+    const data = veriOku();
+    const tip = req.params.tip;
+    if (!data[tip]) data[tip] = [];
+    data[tip].push(...req.body);
+    const birHaftaOnce = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    data[tip] = data[tip].filter(k => k.tarih > birHaftaOnce);
+    veriYaz(data);
+    res.json({ ok: true });
+});
+
+app.post("/sifirla", (req, res) => {
+    if (req.body.sifre !== "suzgec2024") return res.status(403).json({ error: "Yetkisiz" });
+    veriYaz({ ip: [], hash: [], url: [] });
+    res.json({ ok: true });
+});
