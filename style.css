@@ -377,8 +377,9 @@ tr:hover { background:#161b22; }
     top: 10px; right: 15px;
     background: none; border: none;
     color: #b71c1c;
-    font-size: 20px;
-    cursor: pointer;
+    font-size: 10px;
+    cursor: pointer; width: 24px;
+    height: 24px;
 }
 
 .link-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
