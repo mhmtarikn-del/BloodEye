@@ -140,7 +140,8 @@ html += '</div>';
     tempDiv.innerHTML = html;
     wrapper.innerHTML = "";
     wrapper.appendChild(tempDiv.firstChild);
-        document.getElementById("chartHaftalik").scrollLeft = 0;
+            const chartEl = document.getElementById("chartHaftalik");
+    if (chartEl) chartEl.scrollLeft = 9999;
 }
 
 // IP Dedektörü
@@ -209,10 +210,28 @@ async function sorgula() {
         gecmiseEkle({ ip: v.ip, tarih: Date.now(), abusePuan: ap, infoPuan: ip });
     });
 
-    tabloOlustur(sonuclar);
-        const a = ayarlariGetir();
+     tabloOlustur(sonuclar);
+    
+    const a = ayarlariGetir();
+    console.log("Ses test:", a.sesliUyari, "Kritik var mı:", sonuclar.some(v => abuseSusPuan(v) >= getEsikKritik() || infoSusPuan(v) >= getEsikKritik()));
+    
     if (a.sesliUyari && sonuclar.some(v => abuseSusPuan(v) >= getEsikKritik() || infoSusPuan(v) >= getEsikKritik())) {
-        try { new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACAf39/f4B/f3+AgH9/f3+Af39/gIB/f3+AgH9/f3+Af39/gIB/f3+AgH9/f3+Af39/gIB/f39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gH9/f39/f4B/f39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gH9/f39/f4B/f39/f39/gH9/f39/f4B/f39/f3+Af39/f39/gIA=").play().catch(()=>{}); } catch(e) {}
+        try {
+            const beep = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+            beep.volume = 0.8;
+            beep.play().catch(()=>{});
+        } catch(e) {}
+    }
+        // Tarayıcı bildirimi
+        const ayar = ayarlariGetir();
+    if (ayar.tarayiciBildirim && Notification.permission === "granted") {
+        const kritikSayi = sonuclar.filter(v => abuseSusPuan(v) >= getEsikKritik() || infoSusPuan(v) >= getEsikKritik()).length;
+        try {
+            new Notification("SUZGECH", { body: `${kritikSayi} kritik IP bulundu` });
+            console.log("Bildirim basarili");
+        } catch(e) {
+            console.log("Bildirim hatasi:", e.message);
+        }
     }
     btn.disabled = false;
     btn.textContent = "Sorgula";
@@ -751,6 +770,9 @@ if (localStorage.getItem("suzgec_tema") === "light") {
     document.body.classList.add("light-theme");
     const temaBtn = document.getElementById("temaBtn");
     if (temaBtn) temaBtn.textContent = "☀️ Aydınlık";
+}
+if (Notification.permission === "default") {
+    Notification.requestPermission();
 }
 dashboardGuncelle();
 gecmisiGoster();
