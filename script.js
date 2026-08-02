@@ -110,7 +110,7 @@ function aylikGrafikCiz(gecmis) {
     
     let html = '<div class="chart-30-container">';
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 29; i >= 0; i--) {
         const temiz = veri[i] - supheliVeri[i] - kritikVeri[i];
         
         // Yükseklik hesaplaması (En az 2px referans çizgisi görünür)
@@ -134,12 +134,13 @@ function aylikGrafikCiz(gecmis) {
             </div>`;
     }
 
-    html += '</div>';
+html += '</div>';
     const wrapper = container.parentElement;
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
     wrapper.innerHTML = "";
     wrapper.appendChild(tempDiv.firstChild);
+        document.getElementById("chartHaftalik").scrollLeft = 0;
 }
 
 // IP Dedektörü
