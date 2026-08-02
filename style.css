@@ -128,12 +128,11 @@ body {
 /* Chart */
 .chart-container {
     height: 220px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    display: block;
     position: relative;
     overflow-x: auto;
     overflow-y: hidden;
+    width: 100%;
 }
 
 .chart-legend {
