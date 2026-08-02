@@ -428,26 +428,30 @@ async function vtOtomatikBaslat(veriler) {
         await new Promise(r => setTimeout(r, 15000));
     }
 
-    // Tüm VT sonuçlarını toplu kaydet
+
+    console.log("VT bitti, veriler:", veriler.length, "vtSonuc:", veriler.filter(v => v.vtSonuc).length);
+    
     const vtGuncellemeler = veriler.filter(v => v.vtSonuc).map(v => ({
         ip: v.ip,
         vtSonuc: v.vtSonuc,
         vtDetay: v.vtDetay || null
     }));
+    console.log("Gonderilecek:", vtGuncellemeler.length);
     if (vtGuncellemeler.length > 0) {
         try {
-            await fetch("https://bloodeye-proxy.onrender.com/gecmis/vt-toplu-guncelle", {
+            const res = await fetch("https://bloodeye-proxy.onrender.com/gecmis/vt-toplu-guncelle", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(vtGuncellemeler)
             });
-        } catch(e) {}
+            console.log("VT guncelleme cevap:", res.status);
+        } catch(e) { console.log("VT hata:", e.message); }
     }
-
     gecmisiGoster();
     sorguAktif = false;
     window.onbeforeunload = null;
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
+        dashboardGuncelle();
 }
 
 function vtDetayPanel() {
