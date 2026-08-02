@@ -135,7 +135,11 @@ function aylikGrafikCiz(gecmis) {
     }
 
     html += '</div>';
-    container.innerHTML = html;
+    const wrapper = container.parentElement;
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    wrapper.innerHTML = "";
+    wrapper.appendChild(tempDiv.firstChild);
 }
 
 // IP Dedektörü
