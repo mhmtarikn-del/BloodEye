@@ -106,7 +106,7 @@ function aylikGrafikCiz(gecmis) {
     if (!canvas) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const genislik = 1800;
+    const genislik = 1400;
     canvas.width = genislik * dpr;
     canvas.height = 200 * dpr;
     canvas.style.width = genislik + "px";
@@ -116,8 +116,8 @@ function aylikGrafikCiz(gecmis) {
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, genislik, 200);
 
-    const barWidth = Math.max(6, (genislik - 60) / 90);
-    const gap = 2;
+    const barWidth = 4;
+    const gap = 1;
 
     let tooltipDiv = document.getElementById("chartTooltip");
     if (!tooltipDiv) {
