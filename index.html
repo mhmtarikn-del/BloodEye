@@ -218,15 +218,14 @@
                             <input type="text" inputmode="numeric" id="esikKritik" value="21" onchange="ayarKaydet()" style="width:60px; text-align:center;">
                         </div>
                     </div>
-                </div>
-                                    <div class="ayar-kart" id="adminSifirlaKart" style="display:none;">
+                                       <div class="ayar-kart" id="adminSifirlaKart" style="display:none;">
                         <h3>🛡️ Admin İşlemleri</h3>
                         <button class="reset-btn" onclick="sifirlaPopup()" style="width:100%;">🗑️ Tüm Verileri Sıfırla</button>
                     </div>
+                </div>
             </div>
-                        
                                    <!-- URL Süzgeci -->
-            <div id="sayfa-urldetector" class="sayfa">
+                        <div id="sayfa-urldetector" class="sayfa">
                 <div class="container">
                     <textarea id="urlInput" placeholder="URL'leri alt alta girin...&#10;Örn:&#10;google.com&#10;example.com/phishing"></textarea>
                     <button id="urlSorguBtn">URL Sorgula</button>
@@ -235,13 +234,12 @@
                         <div class="vt-baslik">🛡️ Virustotal URL Tarama <span id="vtUrlDurum" class="vt-durum">Bekleniyor...</span></div>
                         <div id="vtUrlSonuc"></div>
                     </div>
+                    <div id="urlGecmisPanel" style="display:none;">
+                        <h3 style="color:#e94560; margin-top:30px;">🕐 Son 24 Saat URL Geçmişi</h3>
+                        <div id="urlGecmisTablo"></div>
+                    </div>
                 </div>
-                <div id="urlGecmisPanel" style="display:none;">
-                    <h3 style="color:#e94560; margin-top:30px;">🕐 Son 24 Saat URL Geçmişi</h3>
-                    <div id="urlGecmisTablo"></div>
-                </div>
-            </div> 
-            
+            </div>
         </main>
     </div>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
