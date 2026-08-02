@@ -101,7 +101,7 @@ app.post("/gecmis/:tip", (req, res) => {
 });
 
 app.post("/sifirla", (req, res) => {
-    if (req.body.sifre !== "suzgec2024") return res.status(403).json({ error: "Yetkisiz" });
+    if (req.body.sifre !== "Szgc!2026") return res.status(403).json({ error: "Yetkisiz" });
     veriYaz({ ip: [], hash: [], url: [] });
     res.json({ ok: true });
 });

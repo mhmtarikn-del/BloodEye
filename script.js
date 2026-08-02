@@ -1,7 +1,15 @@
 // v0.41 - temiz
 let sonVeriler = [];
+let sorguAktif = false;
+window.addEventListener("beforeunload", (e) => {
+    if (sorguAktif) {
+        e.preventDefault();
+        e.returnValue = "";
+    }
+});
 let vtHamVeriler = [];
 let vtIptal = false;
+sorguAktif = true;
 let haritaObj = null;
 
 function sayfaGoster(sayfa) {
@@ -172,6 +180,7 @@ document.getElementById("sorguBtn").addEventListener("click", sorgula);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
 
 async function sorgula() {
+        window.onbeforeunload = () => "Sorgu devam ediyor. Sayfayı yenilemek istediğinize emin misiniz?";
     const input = document.getElementById("ipInput").value.trim();
     const sonucDiv = document.getElementById("sonuc");
     const btn = document.getElementById("sorguBtn");
@@ -204,6 +213,8 @@ async function sorgula() {
 
     vtIptal = true;
     btn.disabled = true;
+    sorguAktif = true;
+        window.onbeforeunload = () => "Sorgu devam ediyor. Sayfayı yenilemek istediğinize emin misiniz?";
     btn.textContent = "Sorgulanıyor...";
     exportBtn.style.display = "none";
     if (vtDetayBtn) vtDetayBtn.style.display = "none";
@@ -257,6 +268,8 @@ async function sorgula() {
         }
     }
     btn.disabled = false;
+    sorguAktif = false;
+        window.onbeforeunload = null;
     btn.textContent = "Sorgula";
     exportBtn.style.display = "block";
     if (vtDetayBtn) vtDetayBtn.style.display = "block";
@@ -288,6 +301,8 @@ function tabloOlustur(veriler) {
 
 async function vtOtomatikBaslat(veriler) {
     vtIptal = false;
+    sorguAktif = true;
+        window.onbeforeunload = () => "VT taraması devam ediyor...";
     const panel = document.getElementById("vtPanel");
     const durum = document.getElementById("vtDurum");
     const sonucDiv = document.getElementById("vtSonuc");
@@ -336,27 +351,13 @@ async function vtOtomatikBaslat(veriler) {
         }
         localStorage.setItem("bloodeye_gecmis", JSON.stringify(gecmis));
         gecmisiGoster();
+            window.onbeforeunload = null;
         
         await new Promise(r => setTimeout(r, 15000));
     }
-    durum.textContent = `Tamamlandı (${veriler.length} IP)`;
-           // VT sonuçlarını localStorage'a kaydet
-    //const gecmis = await gecmisiGetir();
-    //console.log("VT bitti, güncelleme başlıyor. veriler:", veriler.length);
-    //for (let i = 0; i < veriler.length; i++) {
-    //    const v = veriler[i];
-    //    console.log(`IP: ${v.ip}, vtSonuc: ${v.vtSonuc}`);
-    //    if (!v.vtSonuc) continue;
-    //    for (let j = gecmis.length - 1; j >= 0; j--) {
-    //        if (gecmis[j].ip === v.ip && !gecmis[j].vtSonuc) {
-    //            gecmis[j].vtSonuc = v.vtSonuc;
-    //            console.log(`Güncellendi: ${v.ip} -> ${v.vtSonuc}`);
-   //             break;
-   //         }
-    //    }
-   // }
-    //localStorage.setItem("bloodeye_gecmis", JSON.stringify(gecmis));
+    
     gecmisiGoster();
+    durum.textContent = `Tamamlandı (${veriler.length} IP)`;
 }
 
 function vtDetayPanel() {
@@ -647,6 +648,8 @@ document.getElementById("dosyaInput")?.addEventListener("change", async function
     hashSorgula();
 });
 async function hashSorgula() {
+        window.onbeforeunload = () => "Sorgu devam ediyor. Sayfayı yenilemek istediğinize emin misiniz?";
+        
     const input = document.getElementById("hashInput").value.trim();
     const sonucDiv = document.getElementById("hashSonuc");
     const btn = document.getElementById("hashSorguBtn");
@@ -666,6 +669,8 @@ async function hashSorgula() {
     }
 
     btn.disabled = true;
+    sorguAktif = true;
+    window.onbeforeunload = null;
     btn.textContent = "Sorgulanıyor...";
     document.getElementById("vtHashPanel").style.display = "none";
     sonucDiv.innerHTML = '<p class="loading">Virustotal hash sorgulanıyor...</p>';
@@ -691,6 +696,7 @@ async function hashSorgula() {
     hashGecmiseEkle(sonuclar);
     hashGecmisiGoster();
     btn.disabled = false;
+    sorguAktif = false;
     btn.textContent = "Hash Sorgula";
 }
 async function hashGecmisiGetir() { 
@@ -861,6 +867,7 @@ let urlSonVeriler = [];
 document.getElementById("urlSorguBtn")?.addEventListener("click", urlSorgula);
 
 async function urlSorgula() {
+            window.onbeforeunload = () => "Sorgu devam ediyor. Sayfayı yenilemek istediğinize emin misiniz?";
     const input = document.getElementById("urlInput").value.trim();
     const sonucDiv = document.getElementById("urlSonuc");
     const btn = document.getElementById("urlSorguBtn");
@@ -882,6 +889,8 @@ async function urlSorgula() {
     }
 
     btn.disabled = true;
+    sorguAktif = true;
+        window.onbeforeunload = null;
     btn.textContent = "Sorgulanıyor...";
     document.getElementById("vtUrlPanel").style.display = "none";
     sonucDiv.innerHTML = '<p class="loading">Virustotal URL sorgulanıyor...</p>';
@@ -907,6 +916,7 @@ async function urlSorgula() {
     urlGecmiseEkle(sonuclar);
     urlGecmisiGoster();
     btn.disabled = false;
+    sorguAktif = false;
     btn.textContent = "URL Sorgula";
 }
 
