@@ -179,6 +179,7 @@ document.getElementById("sorguBtn").addEventListener("click", sorgula);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
 
 async function sorgula() {
+        if (sorguAktif) return;
         window.onbeforeunload = () => "Sorgu devam ediyor. Sayfayı yenilemek istediğinize emin misiniz?";
     const input = document.getElementById("ipInput").value.trim();
     const sonucDiv = document.getElementById("sonuc");
