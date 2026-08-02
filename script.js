@@ -106,7 +106,7 @@ function aylikGrafikCiz(gecmis) {
     if (!canvas) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const genislik = 1800;
+    const genislik = 2200;
     canvas.width = genislik * dpr;
     canvas.height = 200 * dpr;
     canvas.style.width = genislik + "px";
