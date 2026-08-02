@@ -165,13 +165,8 @@ function aylikGrafikCiz(gecmis) {
     
    
 html += '</div>';
-    const wrapper = container.parentElement;
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = html;
-    wrapper.innerHTML = "";
-    wrapper.appendChild(tempDiv.firstChild);
-            const chartEl = document.getElementById("chartHaftalik");
-    if (chartEl) chartEl.scrollLeft = 9999;
+    container.innerHTML = html;
+    container.scrollLeft = 9999;
 }
 async function gunlukDetayGoster(tarihStr) {
     const parts = tarihStr.split(".");
@@ -430,14 +425,13 @@ async function vtOtomatikBaslat(veriler) {
             document.getElementById(sid).textContent = `${v.ip} → Hata`;
         }
         // VT sonucunu hemen kaydet
-        const gecmis = await gecmisiGetir();
-        for (let j = gecmis.length - 1; j >= 0; j--) {
-            if (gecmis[j].ip === v.ip) {
-                gecmis[j].vtSonuc = v.vtSonuc || "-";
-                break;
-            }
-        }
-        localStorage.setItem("bloodeye_gecmis", JSON.stringify(gecmis));
+        try {
+            await fetch("https://bloodeye-proxy.onrender.com/gecmis/vt-guncelle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ip: v.ip, vtSonuc: v.vtSonuc || "-", vtDetay: v.vtDetay || null })
+            });
+        } catch(e) {}
         gecmisiGoster();
             window.onbeforeunload = null;
         
