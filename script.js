@@ -17,6 +17,7 @@ function sayfaGoster(sayfa) {
             if (haritaObj) setTimeout(() => haritaObj.invalidateSize(), 500);
         }, 300);
     }
+        aylikGrafikCiz(gecmis);
 }
 
 // localStorage
@@ -76,30 +77,27 @@ function dashboardGuncelle() {
     });
     document.getElementById("supheliList").innerHTML = supheliHtml;
 
-    haftalikGrafikCiz(gecmis);
+    aylikGrafikCiz(gecmis);
 }
 
-function haftalikGrafikCiz(gecmis) {
+function aylikGrafikCiz(gecmis) {
     const gunler = [];
-    for (let i = 6; i >= 0; i--) {
+    for (let i = 29; i >= 0; i--) {
         const gun = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-        const gunAdi = gun.getDate().toString().padStart(2,"0");
-        const ayAdi = gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase();
-        const yil = gun.getFullYear();
-        gunler.push(`${gunAdi} ${ayAdi} ${yil}`);
+        gunler.push(gun.getDate() + " " + gun.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase());
     }
 
-    const veri = [0,0,0,0,0,0,0];
-    const supheliVeri = [0,0,0,0,0,0,0];
-    const kritikVeri = [0,0,0,0,0,0,0];
+    const veri = new Array(30).fill(0);
+    const supheliVeri = new Array(30).fill(0);
+    const kritikVeri = new Array(30).fill(0);
     const simdi = Date.now();
 
     gecmis.forEach(k => {
         const gunFarki = Math.floor((simdi - k.tarih) / (24 * 60 * 60 * 1000));
-        if (gunFarki < 7) {
-            veri[6 - gunFarki]++;
-            if (k.seviye === "supheli") supheliVeri[6 - gunFarki]++;
-            if (k.seviye === "kritik") kritikVeri[6 - gunFarki]++;
+        if (gunFarki < 30) {
+            veri[29 - gunFarki]++;
+            if (k.seviye === "supheli") supheliVeri[29 - gunFarki]++;
+            if (k.seviye === "kritik") kritikVeri[29 - gunFarki]++;
         }
     });
 
@@ -108,7 +106,7 @@ function haftalikGrafikCiz(gecmis) {
     if (!canvas) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const genislik = canvas.parentElement.clientWidth - 30;
+    const genislik = Math.max(canvas.parentElement.clientWidth - 30, 900);
     canvas.width = genislik * dpr;
     canvas.height = 200 * dpr;
     canvas.style.width = genislik + "px";
@@ -118,8 +116,8 @@ function haftalikGrafikCiz(gecmis) {
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, genislik, 200);
 
-    const barWidth = Math.max(8, genislik / 35);
-    const gap = barWidth * 0.3;
+    const barWidth = Math.max(6, (genislik - 60) / 90);
+    const gap = 2;
 
     let tooltipDiv = document.getElementById("chartTooltip");
     if (!tooltipDiv) {
@@ -133,8 +131,9 @@ function haftalikGrafikCiz(gecmis) {
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
+        const containerRect = canvas.parentElement.getBoundingClientRect();
         let found = false;
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 30; i++) {
             const x = i * (barWidth * 3 + gap) + 30;
             if (mx >= x && mx <= x + barWidth * 3) {
                 tooltipDiv.style.display = "block";
@@ -149,7 +148,7 @@ function haftalikGrafikCiz(gecmis) {
     };
     canvas.onmouseleave = function() { tooltipDiv.style.display = "none"; };
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 30; i++) {
         const x = i * (barWidth * 3 + gap) + 30;
         const temizH = ((veri[i] - supheliVeri[i] - kritikVeri[i]) / max) * 140;
         const supheliH = (supheliVeri[i] / max) * 140;
@@ -158,14 +157,16 @@ function haftalikGrafikCiz(gecmis) {
         ctx.fillStyle = "#40e0d0";
         ctx.fillRect(x, 150 - temizH, barWidth, temizH);
         ctx.fillStyle = "#ffaa00";
-        ctx.fillRect(x + barWidth + 2, 150 - supheliH, barWidth, supheliH);
+        ctx.fillRect(x + barWidth + 1, 150 - supheliH, barWidth, supheliH);
         ctx.fillStyle = "#c62828";
-        ctx.fillRect(x + (barWidth + 2) * 2, 150 - kritikH, barWidth, kritikH);
+        ctx.fillRect(x + (barWidth + 1) * 2, 150 - kritikH, barWidth, kritikH);
 
-        ctx.fillStyle = "#aaa";
-        ctx.font = "10px Segoe UI";
-        ctx.textAlign = "center";
-        ctx.fillText(gunler[i], x + barWidth * 1.5, 170);
+        if (i % 3 === 0) {
+            ctx.fillStyle = "#aaa";
+            ctx.font = "9px Segoe UI";
+            ctx.textAlign = "center";
+            ctx.fillText(gunler[i], x + barWidth * 1.5, 170);
+        }
     }
 }
 
@@ -724,7 +725,9 @@ hashGecmisiGoster();
 window.addEventListener("resize", () => {
     const gecmis = gecmisiGetir();
     if (gecmis.length > 0 && document.getElementById("chartHaftalik")) {
-        haftalikGrafikCiz(gecmis);
+        aylikGrafikCiz(gecmis);
     }
     if (haritaObj) haritaObj.invalidateSize();
 });
+
+    
