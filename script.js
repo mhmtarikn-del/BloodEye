@@ -452,7 +452,7 @@ async function tehditAnaliziGuncelle() {
         islenenIPler.add(k.ip);
         const cached = konumCache[k.ip], ulke = cached?.country || "??";
         const ulkeKodu = cached?.country || "??";
-        const bayrak = ulkeKodu !== "??" ? ulkeKoduEmoji(ulkeKodu) + " " + ulkeKodu : "🏳️ ??";
+        const bayrak = ulkeKodu !== "??" ? ulkeKoduEmoji(ulkeKodu) : "🏳️";
         ulkeListe.push({ ip: k.ip, ulke: ulkeKodu, bayrak, adet: son7Kayit.filter(x => x.ip === k.ip && x.seviye === "kritik").length });
     }
     const ulkeSirali = ulkeListe.sort((a,b) => b.adet - a.adet).slice(0, 5);
