@@ -105,3 +105,10 @@ app.post("/sifirla", (req, res) => {
     veriYaz({ ip: [], hash: [], url: [] });
     res.json({ ok: true });
 });
+app.post("/login", (req, res) => {
+    if (req.body.sifre === process.env.ADMIN_SIFRE) {
+        res.json({ admin: true });
+    } else {
+        res.json({ admin: false });
+    }
+});

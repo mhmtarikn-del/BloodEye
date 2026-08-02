@@ -37,6 +37,10 @@
             <button class="menu-btn" onclick="sayfaGoster('ayarlar')">⚙️ Ayarlar</button>
             
             <div class="menu-footer">
+                            <div class="menu-login">
+                <button class="menu-btn" id="loginBtn" onclick="loginPopup()">🔑 Giriş</button>
+                <span id="adminBadge" style="display:none;color:#40e0d0;font-size:10px;text-align:center;">🛡️ Admin</span>
+            </div>
                 <div class="versiyon">v1.00</div>
                 <div class="built-by">Builded by <span class="footer-name">M.Tarık</span></div>
             </div>
@@ -95,9 +99,7 @@
                             <div class="ist-satir"><span>Şüpheli:</span><span id="istSupheli" style="color:#ff4444;">0</span></div>
                         </div>
                     </div>
-                                        <div class="db-card db-genis" style="text-align:center; padding:15px;">
-                        <button class="reset-btn" onclick="sifirlaPopup()">🗑️ Tüm Verileri Sıfırla</button>
-                    </div>
+                    
                         
                 </div>
             </div>
@@ -217,6 +219,10 @@
                         </div>
                     </div>
                 </div>
+                                    <div class="ayar-kart" id="adminSifirlaKart" style="display:none;">
+                        <h3>🛡️ Admin İşlemleri</h3>
+                        <button class="reset-btn" onclick="sifirlaPopup()" style="width:100%;">🗑️ Tüm Verileri Sıfırla</button>
+                    </div>
             </div>
                         
                                    <!-- URL Süzgeci -->

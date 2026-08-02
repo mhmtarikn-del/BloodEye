@@ -407,8 +407,52 @@ function exportCSV() {
 }
 
 function kopyala(id) { const t=document.getElementById(id); t.select(); t.setSelectionRange(0,99999); navigator.clipboard.writeText(t.value); const btn=t.parentElement.querySelector(".copyBtn"); btn.textContent="✅"; setTimeout(()=>{btn.textContent="📋";},1500); }
+function loginPopup() {
+    let h = `<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-reset" onclick="event.stopPropagation()">`;
+    h += `<h2>🔑 Admin Girişi</h2>`;
+    h += `<input type="password" id="adminSifre" placeholder="Admin şifresi" style="width:100%;padding:8px;margin-bottom:15px;background:#16213e;color:#eee;border:1px solid #0f3460;border-radius:4px;">`;
+    h += `<div class="btn-group"><button class="btn-tamam" onclick="adminGiris()">Giriş</button><button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button></div>`;
+    h += `</div></div>`;
+    document.body.insertAdjacentHTML("beforeend", h);
+}
 
+async function adminGiris() {
+    const sifre = document.getElementById("adminSifre").value;
+    try {
+        const res = await fetch("https://bloodeye-proxy.onrender.com/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sifre })
+        });
+        const data = await res.json();
+        if (data.admin) {
+            localStorage.setItem("suzgec_admin", "true");
+            document.querySelectorAll(".popup-overlay").forEach(p => p.remove());
+            adminDurumGuncelle();
+        } else {
+            alert("Yanlış şifre!");
+        }
+    } catch(e) { alert("Bağlantı hatası!"); }
+}
+
+function adminCikis() {
+    localStorage.removeItem("suzgec_admin");
+    adminDurumGuncelle();
+}
+
+function adminDurumGuncelle() {
+    const admin = localStorage.getItem("suzgec_admin") === "true";
+    document.getElementById("loginBtn").textContent = admin ? "🔓 Çıkış" : "🔑 Giriş";
+    document.getElementById("loginBtn").onclick = admin ? adminCikis : loginPopup;
+    document.getElementById("adminBadge").style.display = admin ? "block" : "none";
+    const kart = document.getElementById("adminSifirlaKart");
+    if (kart) kart.style.display = admin ? "block" : "none";
+}
 function sifirlaPopup() {
+        if (localStorage.getItem("suzgec_admin") !== "true") {
+        alert("Bu işlem için admin yetkisi gerekli!");
+        return;
+    }
     let h=`<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-reset" onclick="event.stopPropagation()"><h2>⚠️ Tüm Verileri Sıfırla</h2><p>Dashboard verileri kalıcı olarak silinecek.</p><input type="password" id="sifreInput" placeholder="Admin şifresi" style="width:100%;padding:8px;margin-bottom:15px;background:#16213e;color:#eee;border:1px solid #0f3460;border-radius:4px;"><div class="btn-group"><button class="btn-tamam" onclick="sifirlaOnay()">Tamam</button><button class="btn-iptal" onclick="document.querySelector('.popup-overlay').remove()">İptal</button></div></div></div>`;
     document.body.insertAdjacentHTML("beforeend", h);
 }
@@ -935,6 +979,7 @@ async function urlGecmisiGoster() {
     html += "</table>";
     document.getElementById("urlGecmisTablo").innerHTML = html;
 }
+adminDurumGuncelle();
 dashboardGuncelle();
 urlGecmisiGoster();
 gecmisiGoster();
