@@ -38,6 +38,7 @@ async function gecmiseEkle(kayit) {
     if (puan >= getEsikKritik()) kayit.seviye = "kritik";
     else if (puan >= getEsikSupheli()) kayit.seviye = "supheli";
     else kayit.seviye = "temiz";
+        kayit.vtDetay = kayit.vtDetay || null;
     try {
         await fetch("https://bloodeye-proxy.onrender.com/gecmis/ip", {
             method: "POST",
@@ -190,11 +191,13 @@ async function gunlukDetayGoster(tarihStr) {
         if (data.ip.length === 0) {
             html += `<p class="bos">IP taranmamıştır</p>`;
         } else {
-            html += `<table><tr><th>IP</th><th>Saat</th><th>Durum</th><th>Abuse</th><th>ipinfo</th></tr>`;
+            html += `<table><tr><th>IP</th><th>Saat</th><th>Durum</th><th>Abuse</th><th>ipinfo</th><th>VT</th><th></th></tr>`;
             data.ip.forEach(k => {
                 const saat = new Date(k.tarih).toLocaleTimeString("tr-TR");
                 const durum = k.seviye === "kritik" ? "🔴 Kritik" : k.seviye === "supheli" ? "🟠 Şüpheli" : "🟢 Temiz";
-                html += `<tr><td>${k.ip}</td><td>${saat}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td></tr>`;
+                const vtSonuc = k.vtSonuc || "-";
+                const hasDetay = k.vtDetay ? true : false;
+                html += `<tr><td>${k.ip}</td><td>${saat}</td><td>${durum}</td><td>%${k.abusePuan||0}</td><td>%${k.infoPuan||0}</td><td>${vtSonuc}</td><td>${hasDetay ? `<button class="detayBtn" onclick="event.stopPropagation();gunlukVTDetay('${k.ip}','${tarih}')">VT Detay</button>` : "-"}</td></tr>`;
             });
             html += `</table>`;
         }
@@ -236,6 +239,27 @@ function gunlukIPKopyala() {
     const data = document.getElementById("gunlukIPData").textContent;
     navigator.clipboard.writeText(data);
     alert("IP'ler kopyalandı!");
+}
+async function gunlukVTDetay(ip, tarih) {
+    try {
+        const res = await fetch(`https://bloodeye-proxy.onrender.com/gunluk-log/${tarih}`);
+        const data = await res.json();
+        const kayit = data.ip.find(k => k.ip === ip && k.vtDetay);
+        if (!kayit || !kayit.vtDetay) { alert("VT detayı bulunamadı."); return; }
+        const d = kayit.vtDetay;
+        let h = `<div class="popup-overlay" onclick="this.remove()"><div class="popup popup-vt" onclick="event.stopPropagation()">`;
+        h += `<h2>🛡️ VT Detay - ${ip}</h2><button class="popup-close" onclick="document.querySelector('.popup-overlay').remove()">✕</button>`;
+        h += `<div class="vt-bilgi-satir"><span>Toplam:</span><span>${d.total}</span></div>`;
+        h += `<div class="vt-bilgi-satir"><span>Zararlı:</span><span style="color:#c62828;">${d.malicious}</span></div>`;
+        h += `<div class="vt-bilgi-satir"><span>Şüpheli:</span><span style="color:#ffaa00;">${d.suspicious}</span></div>`;
+        h += `<div class="vt-bilgi-satir"><span>Temiz:</span><span style="color:#40e0d0;">${d.harmless}</span></div>`;
+        if (d.engines && d.engines.length > 0) {
+            h += `<h4 style="color:#c62828;margin-top:10px;">⚠️ Tespit Eden Motorlar:</h4>`;
+            d.engines.forEach(e => { h += `<span class="vt-etiket">${e.name}: ${e.result || e.category}</span>`; });
+        }
+        h += `</div></div>`;
+        document.body.insertAdjacentHTML("beforeend", h);
+    } catch(e) {}
 }
 // IP Dedektörü
 document.getElementById("sorguBtn").addEventListener("click", sorgula);
@@ -386,7 +410,8 @@ async function vtOtomatikBaslat(veriler) {
                 const mal = stats.malicious || 0;
                 const tot = Object.values(stats).reduce((a,b) => a+b, 0);
                 document.getElementById(`vt-${i}`).textContent = `${mal}/${tot}`;
-                                v.vtSonuc = `${mal}/${tot}`;
+                                v.vtSonuc = `${mal}/${tot}`;                                
+                                v.vtDetay = { total: tot, malicious: mal, suspicious: stats.suspicious || 0, harmless: stats.harmless || 0, engines: Object.entries(res.data.attributes.last_analysis_results || {}).filter(([k,v]) => v.category === "malicious" || v.category === "suspicious").map(([k,v]) => ({ name: k, result: v.result, category: v.category })) };
                 if (mal > 0) {
                     document.getElementById(`vt-${i}`).style.color = "#c62828";
                     document.getElementById(`vt-${i}`).style.fontWeight = "bold";
