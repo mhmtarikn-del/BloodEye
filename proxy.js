@@ -117,27 +117,38 @@ app.post("/sifirla", (req, res) => {
 app.post("/gecmis/vt-toplu-guncelle", (req, res) => {
     const data = veriOku();
     const guncellemeler = req.body;
+    
     guncellemeler.forEach(g => {
-        for (let i = data.ip.length - 1; i >= 0; i--) {
-            if (data.ip[i].ip === g.ip) {
-                data.ip[i].vtSonuc = g.vtSonuc;
-                if (g.vtDetay) data.ip[i].vtDetay = g.vtDetay;
-                break;
+        // En son yapılan sorguyu bulup vtSonuc ve vtDetay verilerini kesin olarak işliyoruz
+        const index = data.ip.findLastIndex(item => item.ip === g.ip);
+        if (index !== -1) {
+            data.ip[index].vtSonuc = g.vtSonuc;
+            if (g.vtDetay) {
+                data.ip[index].vtDetay = g.vtDetay;
             }
         }
     });
+    
     veriYaz(data);
     res.json({ ok: true });
 });
+
 app.get("/gunluk-log/:tarih", (req, res) => {
     const data = veriOku();
-    const tarih = req.params.tarih; // "2026-08-04" formatında
-    const gunBas = new Date(tarih).getTime();
-    const gunSon = gunBas + 24 * 60 * 60 * 1000;
-    
-    const ipLog = data.ip.filter(k => k.tarih >= gunBas && k.tarih < gunSon);
-    const hashLog = data.hash.filter(k => k.tarih >= gunBas && k.tarih < gunSon);
-    const urlLog = data.url.filter(k => k.tarih >= gunBas && k.tarih < gunSon);
+    const hedefTarihStr = req.params.tarih; // Örn: "2026-08-03"
+
+    // Timezone sorunu yaşamamak için timestamp'i YYYY-MM-DD formatına çevirip kıyaslıyoruz
+    const isSameDay = (timestamp) => {
+        const d = new Date(timestamp);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}` === hedefTarihStr;
+    };
+
+    const ipLog = (data.ip || []).filter(k => isSameDay(k.tarih));
+    const hashLog = (data.hash || []).filter(k => isSameDay(k.tarih));
+    const urlLog = (data.url || []).filter(k => isSameDay(k.tarih));
     
     res.json({ ip: ipLog, hash: hashLog, url: urlLog });
 });

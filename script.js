@@ -431,11 +431,12 @@ async function vtOtomatikBaslat(veriler) {
 
     console.log("VT bitti, veriler:", veriler.length, "vtSonuc:", veriler.filter(v => v.vtSonuc).length);
     
-    const vtGuncellemeler = veriler.filter(v => v.vtSonuc).map(v => ({
+    const vtGuncellemeler = veriler.filter(v => v.vtSonuc && v.vtSonuc !== "Hata").map(v => ({
         ip: v.ip,
         vtSonuc: v.vtSonuc,
         vtDetay: v.vtDetay || null
     }));
+    
     console.log("Gonderilecek:", vtGuncellemeler.length);
     if (vtGuncellemeler.length > 0) {
         try {
@@ -445,9 +446,16 @@ async function vtOtomatikBaslat(veriler) {
                 body: JSON.stringify(vtGuncellemeler)
             });
             console.log("VT guncelleme cevap:", res.status);
-        } catch(e) { console.log("VT hata:", e.message); }
+            // Kayıt başarılı olduktan sonra arayüzü ve verileri hemen tazele
+            await gecmisiGoster();
+            await dashboardGuncelle();
+        } catch(e) { 
+            console.log("VT hata:", e.message); 
+        }
     }
-    gecmisiGoster();
+    sorguAktif = false;
+    window.onbeforeunload = null;
+    durum.textContent = `Tamamlandı (${veriler.length} IP)`;
     sorguAktif = false;
     window.onbeforeunload = null;
     durum.textContent = `Tamamlandı (${veriler.length} IP)`;
