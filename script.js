@@ -17,7 +17,6 @@ function sayfaGoster(sayfa) {
             if (haritaObj) setTimeout(() => haritaObj.invalidateSize(), 500);
         }, 300);
     }
-        aylikGrafikCiz(gecmis);
 }
 
 // localStorage
@@ -80,7 +79,7 @@ function dashboardGuncelle() {
     aylikGrafikCiz(gecmis);
 }
 
-JavaScript
+
 function aylikGrafikCiz(gecmis) {
     const gunler = [];
     for (let i = 29; i >= 0; i--) {
