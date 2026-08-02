@@ -13,7 +13,7 @@
         <!-- Sağ Menü -->
         <nav class="side-menu">
             <div class="menu-logo">
-                <svg width="45" height="45" viewBox="0 0 100 100">
+                <svg width="75" height="75" viewBox="0 0 100 100">
                     <rect x="15" y="15" width="70" height="10" rx="3" fill="none" stroke="#aaa" stroke-width="3"/>
                     <rect x="10" y="28" width="80" height="55" rx="10" fill="none" stroke="#aaa" stroke-width="3"/>
                     <line x1="23" y1="42" x2="23" y2="83" stroke="#aaa" stroke-width="1.5"/>
@@ -24,7 +24,7 @@
                     <circle cx="50" cy="73" r="5" fill="#c62828" opacity="0.8"/>
                     <circle cx="62" cy="55" r="3" fill="#c62828" opacity="0.6"/>
                 </svg>
-                <span style="color:#fff;letter-spacing:3px;font-size:22px;">SUZGECH</span>
+                <span style="color:#fff;letter-spacing:3px;font-size:28px;">SUZGECH</span>
             </div>
             <button class="menu-btn active" onclick="sayfaGoster('dashboard')">📊 Dashboard</button>
             <button class="menu-btn" onclick="sayfaGoster('detector')">🔍 IP Süzgeci</button>
@@ -33,7 +33,7 @@
            
             <button class="menu-btn disabled">⚙️ Ayarlar</button>
             <div class="menu-footer">
-                <div class="versiyon">v0.60</div>
+                <div class="versiyon">v0.67</div>
                 <div class="built-by">Builded by <span class="footer-name">M.Tarık</span></div>
             </div>
         </nav>
@@ -43,15 +43,22 @@
             <!-- Dashboard -->
             <div id="sayfa-dashboard" class="sayfa active">
                 <div class="db-grid">
-                    <div class="db-card db-genis">
+                                        <div class="db-card db-genis">
                         <h3>📈 Haftalık Tarama Geçmişi</h3>
-                        <div class="chart-container">
-                            <canvas id="chartHaftalik"></canvas>
-                        </div>
-                        <div class="chart-legend">
-                                                        <span><span class="legend-dot" style="background:#40e0d0;"></span> Temiz</span>
-                            <span><span class="legend-dot" style="background:#ffaa00;"></span> Şüpheli</span>
-                            <span><span class="legend-dot" style="background:#ff4444;"></span> Kritik</span>
+                        <div style="display:flex; gap:15px;">
+                            <div class="chart-container" style="flex:1;">
+                                <canvas id="chartHaftalik"></canvas>
+                                <div class="chart-legend">
+                                    <span><span class="legend-dot" style="background:#40e0d0;"></span> Temiz</span>
+                                    <span><span class="legend-dot" style="background:#ffaa00;"></span> Şüpheli</span>
+                                    <span><span class="legend-dot" style="background:#ff4444;"></span> Kritik</span>
+                                </div>
+                            </div>
+                            <div class="istatistik" id="istatistikler" style="min-width:140px; padding-left:15px; border-left:1px solid #0f3460;">
+                                <div class="ist-satir"><span>Toplam:</span><span id="istToplam">0</span></div>
+                                <div class="ist-satir"><span>Temiz:</span><span id="istTemiz" style="color:#40e0d0;">0</span></div>
+                                <div class="ist-satir"><span>Şüpheli:</span><span id="istSupheli" style="color:#ff4444;">0</span></div>
+                            </div>
                         </div>
                     </div>
                     <div class="db-card">
@@ -73,14 +80,7 @@
                             <p class="bos">Henüz veri yok</p>
                         </div>
                     </div>
-                    <div class="db-card">
-                        <h3>📊 Özet İstatistikler</h3>
-                        <div class="istatistik" id="istatistikler">
-                            <div class="ist-satir"><span>Toplam tarama:</span><span id="istToplam">0</span></div>
-                            <div class="ist-satir"><span>Temiz:</span><span id="istTemiz" style="color:#40e0d0;">0</span></div>
-                            <div class="ist-satir"><span>Şüpheli:</span><span id="istSupheli" style="color:#ff4444;">0</span></div>
-                        </div>
-                    </div>
+                   
                                         <div class="db-card db-genis" style="text-align:center; padding:15px;">
                         <button class="reset-btn" onclick="sifirlaPopup()">🗑️ Tüm Verileri Sıfırla</button>
                     </div>
