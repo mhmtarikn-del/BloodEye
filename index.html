@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BloodEye - Dashboard</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%231a1a2e' stroke='%23e94560' stroke-width='3'/><circle cx='50' cy='48' r='16' fill='%23990000'/><circle cx='50' cy='48' r='7' fill='%23000'/><circle cx='46' cy='44' r='3' fill='%23ff4444'/><path d='M20 30 L40 38' stroke='%23e94560' stroke-width='3' stroke-linecap='round'/><path d='M80 30 L60 38' stroke='%23e94560' stroke-width='3' stroke-linecap='round'/></svg>">
+            <title>SUZGECH</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='15' width='70' height='12' rx='3' fill='none' stroke='%23aaa' stroke-width='3'/><rect x='10' y='30' width='80' height='55' rx='10' fill='none' stroke='%23aaa' stroke-width='3'/><line x1='25' y1='45' x2='25' y2='85' stroke='%23aaa' stroke-width='2'/><line x1='37' y1='45' x2='37' y2='85' stroke='%23aaa' stroke-width='2'/><line x1='49' y1='45' x2='49' y2='85' stroke='%23aaa' stroke-width='2'/><line x1='61' y1='45' x2='61' y2='85' stroke='%23aaa' stroke-width='2'/><line x1='73' y1='45' x2='73' y2='85' stroke='%23aaa' stroke-width='2'/><circle cx='50' cy='75' r='6' fill='%23c62828' opacity='0.8'/><circle cx='62' cy='55' r='4' fill='%23c62828' opacity='0.6'/></svg>">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
 </head>
@@ -14,14 +14,17 @@
         <nav class="side-menu">
             <div class="menu-logo">
                 <svg width="30" height="30" viewBox="0 0 100 100">
-                    <ellipse cx="50" cy="50" rx="28" ry="26" fill="none" stroke="#e94560" stroke-width="3"/>
-                    <circle cx="50" cy="48" r="12" fill="#8b0000"/>
-                    <circle cx="50" cy="48" r="5" fill="#1a1a2e"/>
-                    <circle cx="47" cy="46" r="1.5" fill="#ff4444"/>
-                    <line x1="20" y1="22" x2="38" y2="30" stroke="#e94560" stroke-width="2.5"/>
-                    <line x1="80" y1="22" x2="62" y2="30" stroke="#e94560" stroke-width="2.5"/>
+                    <rect x="15" y="15" width="70" height="10" rx="3" fill="none" stroke="#aaa" stroke-width="3"/>
+                    <rect x="10" y="28" width="80" height="55" rx="10" fill="none" stroke="#aaa" stroke-width="3"/>
+                    <line x1="23" y1="42" x2="23" y2="83" stroke="#aaa" stroke-width="1.5"/>
+                    <line x1="35" y1="42" x2="35" y2="83" stroke="#aaa" stroke-width="1.5"/>
+                    <line x1="47" y1="42" x2="47" y2="83" stroke="#aaa" stroke-width="1.5"/>
+                    <line x1="59" y1="42" x2="59" y2="83" stroke="#aaa" stroke-width="1.5"/>
+                    <line x1="71" y1="42" x2="71" y2="83" stroke="#aaa" stroke-width="1.5"/>
+                    <circle cx="50" cy="73" r="5" fill="#c62828" opacity="0.8"/>
+                    <circle cx="62" cy="55" r="3" fill="#c62828" opacity="0.6"/>
                 </svg>
-                <span>Blood<span style="color:#e94560;">Eye</span></span>
+                <span style="color:#fff;letter-spacing:3px;">SUZGECH</span>
             </div>
             <button class="menu-btn active" onclick="sayfaGoster('dashboard')">📊 Dashboard</button>
             <button class="menu-btn" onclick="sayfaGoster('detector')">🔍 IP Dedektörü</button>
@@ -30,7 +33,7 @@
            
             <button class="menu-btn disabled">⚙️ Ayarlar</button>
             <div class="menu-footer">
-                <div class="versiyon">v0.54</div>
+                <div class="versiyon">v0.60</div>
                 <div class="built-by">Builded by <span class="footer-name">M.Tarık</span></div>
             </div>
         </nav>
@@ -139,6 +142,22 @@
             </div>
             <div id="sayfa-detector" class="sayfa">
                 <div class="container">
+                                    <div class="header">
+                    <div class="logo">
+                        <svg width="55" height="55" viewBox="0 0 100 100">
+                            <rect x="10" y="12" width="80" height="12" rx="3" fill="none" stroke="#aaa" stroke-width="3"/>
+                            <rect x="5" y="28" width="90" height="60" rx="12" fill="none" stroke="#aaa" stroke-width="3"/>
+                            <line x1="20" y1="45" x2="20" y2="88" stroke="#aaa" stroke-width="2"/>
+                            <line x1="34" y1="45" x2="34" y2="88" stroke="#aaa" stroke-width="2"/>
+                            <line x1="48" y1="45" x2="48" y2="88" stroke="#aaa" stroke-width="2"/>
+                            <line x1="62" y1="45" x2="62" y2="88" stroke="#aaa" stroke-width="2"/>
+                            <line x1="76" y1="45" x2="76" y2="88" stroke="#aaa" stroke-width="2"/>
+                            <circle cx="50" cy="78" r="6" fill="#c62828" opacity="0.7"/>
+                            <circle cx="65" cy="55" r="4" fill="#c62828" opacity="0.5"/>
+                        </svg>
+                        <span class="logo-text" style="color:#fff;letter-spacing:4px;">SUZGECH</span>
+                    </div>
+                </div>
                     <textarea id="ipInput" placeholder="İp adresi içeren metinleri girin...&#10;Örn:&#10;8.8.8.8 Google DNS&#10;1.1.1.1 Cloudflare"></textarea>
                     <button id="sorguBtn">Sorgula</button>
                     <button id="exportBtn" style="display:none; background:#0f3460;">Excel'e Aktar</button>
