@@ -56,8 +56,8 @@ function dashboardGuncelle() {
     const son24Kayit = gecmis.filter(k => k.tarih > son24s);
     const son24Tehlikeli = son24Kayit.filter(k => k.seviye === "kritik" || k.seviye === "supheli").length;
     const oran = son24Kayit.length > 0 ? Math.round((son24Tehlikeli / son24Kayit.length) * 100) : 0;
-    document.getElementById("gaugeDetay").textContent = `${son24Tehlikeli}/${son24Kayit.length} IP`;
-    gaugeCiz(oran);
+    //document.getElementById("gaugeDetay").textContent = `${son24Tehlikeli}/${son24Kayit.length} IP`;
+        gaugeCiz(oran, "gaugeIP");
 
     const kritikIPs = [...new Set(gecmis.filter(k => k.seviye === "kritik").map(k => k.ip))];
     let kritikHtml = "";
@@ -78,6 +78,19 @@ function dashboardGuncelle() {
     document.getElementById("supheliList").innerHTML = supheliHtml;
 
     aylikGrafikCiz(gecmis);
+        // Hash gauge
+    const hashGecmis = JSON.parse(localStorage.getItem("bloodeye_hash_gecmis") || "[]");
+    const hash24 = hashGecmis.filter(k => k.tarih > son24s);
+    const hashKritik = hash24.filter(k => k.malicious > 0).length;
+    const hashOran = hash24.length > 0 ? Math.round((hashKritik / hash24.length) * 100) : 0;
+    gaugeCiz(hashOran, "gaugeHash");
+
+    // URL gauge
+    const urlGecmis = JSON.parse(localStorage.getItem("suzgec_url_gecmis") || "[]");
+    const url24 = urlGecmis.filter(k => k.tarih > son24s);
+    const urlKritik = url24.filter(k => k.malicious > 0).length;
+    const urlOran = url24.length > 0 ? Math.round((urlKritik / url24.length) * 100) : 0;
+    gaugeCiz(urlOran, "gaugeURL");
 }
 
 
@@ -134,7 +147,15 @@ function aylikGrafikCiz(gecmis) {
                 </div>
             </div>`;
     }
-
+    // Trend çizgisi
+    let svgPoints = "";
+    veri.forEach((v, i) => {
+        const px = i * 41 + 17;
+        const py = 150 - ((v / max) * 140);
+        svgPoints += `${px},${py} `;
+    });
+    
+   
 html += '</div>';
     const wrapper = container.parentElement;
     const tempDiv = document.createElement("div");
@@ -403,8 +424,8 @@ function gecmisiGoster() {
 
 function ulkeKoduEmoji(kod) { if(!kod||kod.length!==2)return"🏳️"; return String.fromCodePoint(kod.charCodeAt(0)+127397,kod.charCodeAt(1)+127397); }
 
-function gaugeCiz(oran) {
-    const canvas = document.getElementById("gaugeCanvas");
+function gaugeCiz(oran, canvasId) {
+    const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = 240 * dpr;
