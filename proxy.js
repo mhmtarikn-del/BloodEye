@@ -90,7 +90,11 @@ app.post("/gecmis/:tip", (req, res) => {
     const data = veriOku();
     const tip = req.params.tip;
     if (!data[tip]) data[tip] = [];
-    data[tip].push(...req.body);
+    if (Array.isArray(req.body)) {
+        data[tip].push(...req.body);
+    } else {
+        data[tip].push(req.body);
+    }
     const birHaftaOnce = Date.now() - 7 * 24 * 60 * 60 * 1000;
     data[tip] = data[tip].filter(k => k.tarih > birHaftaOnce);
     veriYaz(data);
