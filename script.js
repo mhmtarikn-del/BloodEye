@@ -384,38 +384,48 @@ function gaugeCiz(oran) {
     const canvas = document.getElementById("gaugeCanvas");
     if (!canvas) return;
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = 200 * dpr;
-    canvas.height = 140 * dpr;
-    canvas.style.width = "200px";
-    canvas.style.height = "140px";
+    canvas.width = 240 * dpr;
+    canvas.height = 180 * dpr;
+    canvas.style.width = "240px";
+    canvas.style.height = "180px";
     const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
-    const w = 200, h = 140, cx = w/2, cy = h - 15, r = 85;
+    const w = 240, h = 180, cx = w/2, cy = h - 10, r = 100;
     ctx.clearRect(0, 0, w, h);
+    
+    // Arka plan halka
     ctx.beginPath();
     ctx.arc(cx, cy, r, Math.PI, 0);
     ctx.strokeStyle = "#1a1a2e";
-    ctx.lineWidth = 16;
+    ctx.lineWidth = 22;
     ctx.stroke();
+    
+    // Renk
     let renk = "#40e0d0";
     if (oran >= 70) renk = "#c62828";
     else if (oran >= 40) renk = "#ffaa00";
+    
+    // Dolu kısım
     const aci = Math.PI + (Math.PI * oran / 100);
     ctx.beginPath();
     ctx.arc(cx, cy, r, Math.PI, aci);
     ctx.strokeStyle = renk;
-    ctx.lineWidth = 14;
+    ctx.lineWidth = 20;
     ctx.lineCap = "round";
     ctx.stroke();
     ctx.lineCap = "butt";
+    
+    // Yüzde - tam ortada
     ctx.fillStyle = renk;
-    ctx.font = "bold 22px 'Segoe UI'";
+    ctx.font = "bold 28px 'Segoe UI'";
     ctx.textAlign = "center";
-    ctx.fillText("%" + oran, cx, cy - 50);
+    ctx.fillText("%" + oran, cx, cy - 55);
+    
+    // Uç nokta
     const ex = cx + r * Math.cos(aci);
     const ey = cy + r * Math.sin(aci);
     ctx.beginPath();
-    ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+    ctx.arc(ex, ey, 6, 0, Math.PI * 2);
     ctx.fillStyle = renk;
     ctx.fill();
 }
