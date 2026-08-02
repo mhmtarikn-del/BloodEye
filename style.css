@@ -126,13 +126,16 @@ body {
 .db-genis { grid-column: 1 / -1; }
 
 /* Chart */
-.chart-container {
-    height: 220px;
-    display: block;
-    position: relative;
-    overflow-x: auto;
-    overflow-y: hidden;
+.chart-scroll-wrapper {
     width: 100%;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    height: 220px;
+    position: relative;
+}
+.chart-scroll-wrapper canvas {
+    display: block;
+    height: 200px;
 }
 
 .chart-legend {

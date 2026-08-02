@@ -107,10 +107,10 @@ function aylikGrafikCiz(gecmis) {
 
     const dpr = window.devicePixelRatio || 1;
     const genislik = 2200;
-    canvas.width = genislik * dpr;
-    canvas.height = 200 * dpr;
     canvas.style.width = genislik + "px";
     canvas.style.height = "200px";
+    canvas.width = genislik * dpr;
+    canvas.height = 200 * dpr;
 
     const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
