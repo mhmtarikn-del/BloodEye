@@ -133,3 +133,23 @@ app.get("/gunluk-log/:tarih", (req, res) => {
     
     res.json({ ip: ipLog, hash: hashLog, url: urlLog });
 });
+app.post("/login", (req, res) => {
+    if (req.body.sifre === ADMIN_SIFRE) {
+        res.json({ admin: true });
+    } else {
+        res.json({ admin: false });
+    }
+});
+
+app.post("/sifirla", (req, res) => {
+    if (req.body.sifre !== ADMIN_SIFRE) return res.status(403).json({ error: "Yetkisiz" });
+    veriYaz({ ip: [], hash: [], url: [] });
+    res.json({ ok: true });
+});
+
+app.get("/", (req, res) => {
+    res.send("BloodEye Proxy - Running");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Proxy running on port " + PORT));
