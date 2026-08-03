@@ -17,6 +17,7 @@ function veriOku() {
 }
 function veriYaz(data) {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data));
+    console.log("veriYaz OK, IP:", data.ip.length);
 }
 
 app.use(cors());
@@ -103,21 +104,17 @@ app.post("/gecmis/:tip", (req, res) => {
 
 app.post("/gecmis/vt-toplu-guncelle", (req, res) => {
     const data = veriOku();
-    if (!data.ip) data.ip = [];
+    console.log("vt-toplu-guncelle çağrıldı, guncelleme sayisi:", req.body.length);
     const guncellemeler = req.body || [];
-    
     guncellemeler.forEach(g => {
         for (let i = data.ip.length - 1; i >= 0; i--) {
             if (data.ip[i].ip === g.ip) {
                 data.ip[i].vtSonuc = g.vtSonuc;
-                if (g.vtDetay) {
-                    data.ip[i].vtDetay = g.vtDetay;
-                }
+                console.log("Güncellendi:", g.ip, g.vtSonuc);
                 break;
             }
         }
     });
-    
     veriYaz(data);
     res.json({ ok: true });
 });
